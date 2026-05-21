@@ -1,0 +1,20 @@
+# dados grandes / intermediários (vivem fora do git)
+data/*.jsonl
+data/*.json
+data/*.db
+data/*.csv
+*.tar
+*.tar.*
+
+# python
+__pycache__/
+*.pyc
+.venv/
+
+# latex build
+*.aux
+*.log
+*.out
+*.bbl
+*.blg
+*.synctex.gz
