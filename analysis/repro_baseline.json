@@ -1,0 +1,465 @@
+{
+  "meta": {
+    "sample": "uniform-random baseline (control group)",
+    "db": "/mnt/win_ssd/bl_snap.db",
+    "n_reports": 2876,
+    "n_official": 0,
+    "n_community": 2876,
+    "elapsed_s": 189.9,
+    "caveats": "Directional only: scanner battery (trivy/grype/osv merged, not deduplicated), sample (uniform random vs each study's sample) and elapsed time all differ from the cited studies. Per-image vuln counts are the merged raw pkg-vuln count (inflates the mean; medians reported alongside and a deduplicated-distinct count given as robustness)."
+  },
+  "shu2017": {
+    "reproduced_analysis": "worst-severity bucket per image; vulns/image median; CVEs by year; top-10 vulnerable packages",
+    "reported": {
+      "worst_severity_modal": "high (>80% have >=1 high-severity)",
+      "community_vuln_median": 158,
+      "community_vuln_mean": 199,
+      "cve_years_span": "2008-2015"
+    },
+    "ours_random": {
+      "worst_severity_modal": "critical",
+      "worst_severity_pct": {
+        "none": 3.1,
+        "low": 0.0,
+        "medium": 0.2,
+        "high": 1.4,
+        "critical": 95.3
+      },
+      "vuln_median_merged": 948.5,
+      "vuln_mean_merged": 2942.1,
+      "vuln_max_merged": 26511,
+      "vuln_median_distinct": 564.0,
+      "n_distinct_cves": 35019,
+      "oldest_cve_year": 1999,
+      "pct_cves_2020plus": 72.8,
+      "top10_packages": [
+        {
+          "package": "zlib",
+          "vuln_images": 2605,
+          "pct_corpus": 90.6,
+          "findings": 9191,
+          "cves": 10,
+          "images_with_critical": 1638
+        },
+        {
+          "package": "openssl",
+          "vuln_images": 2480,
+          "pct_corpus": 86.2,
+          "findings": 178199,
+          "cves": 219,
+          "images_with_critical": 1970
+        },
+        {
+          "package": "tar",
+          "vuln_images": 2107,
+          "pct_corpus": 73.3,
+          "findings": 29867,
+          "cves": 27,
+          "images_with_critical": 0
+        },
+        {
+          "package": "util-linux",
+          "vuln_images": 1741,
+          "pct_corpus": 60.5,
+          "findings": 57693,
+          "cves": 17,
+          "images_with_critical": 1
+        },
+        {
+          "package": "ncurses-base",
+          "vuln_images": 1736,
+          "pct_corpus": 60.4,
+          "findings": 17508,
+          "cves": 30,
+          "images_with_critical": 57
+        },
+        {
+          "package": "coreutils",
+          "vuln_images": 1702,
+          "pct_corpus": 59.2,
+          "findings": 9129,
+          "cves": 9,
+          "images_with_critical": 0
+        },
+        {
+          "package": "ncurses",
+          "vuln_images": 1690,
+          "pct_corpus": 58.8,
+          "findings": 44738,
+          "cves": 29,
+          "images_with_critical": 502
+        },
+        {
+          "package": "systemd",
+          "vuln_images": 1668,
+          "pct_corpus": 58.0,
+          "findings": 61613,
+          "cves": 53,
+          "images_with_critical": 155
+        },
+        {
+          "package": "libc6",
+          "vuln_images": 1637,
+          "pct_corpus": 56.9,
+          "findings": 61914,
+          "cves": 131,
+          "images_with_critical": 967
+        },
+        {
+          "package": "libc-bin",
+          "vuln_images": 1630,
+          "pct_corpus": 56.7,
+          "findings": 61812,
+          "cves": 131,
+          "images_with_critical": 960
+        }
+      ]
+    }
+  },
+  "zerouali2019": {
+    "reproduced_analysis": "vulnerabilities-per-image distribution (median/mean/max)",
+    "reported": {
+      "median": 601,
+      "mean": 1336,
+      "max": 7338,
+      "note": "Debian-based images, all severities; effectively 100% affected"
+    },
+    "ours_random": {
+      "median_merged": 948.5,
+      "mean_merged": 2942.1,
+      "max_merged": 26511,
+      "min_merged": 0,
+      "median_distinct": 564.0,
+      "mean_distinct": 1745.0,
+      "max_distinct": 19908,
+      "pct_images_with_vuln": 96.9
+    }
+  },
+  "liu2020": {
+    "reproduced_analysis": "high/critical prevalence, official vs community",
+    "reported": {
+      "official_hc_pct": 30.0,
+      "community_hc_pct": 64.0,
+      "note": "~30% official, >64% community"
+    },
+    "ours_random": {
+      "n_official": 0,
+      "n_community": 2876,
+      "official_high_or_crit": 0,
+      "community_high_or_crit": 2779,
+      "official_hc_pct": 0.0,
+      "community_hc_pct": 96.6,
+      "caveat": "random sample has very few official images (N=0); the official percentage is a small-sample estimate"
+    }
+  },
+  "wist2021": {
+    "reproduced_analysis": "severe (high+critical) findings by ecosystem class (OS vs language)",
+    "reported": {
+      "note": "most severe surface in language ecosystems (JavaScript, Python)"
+    },
+    "ours_random": {
+      "sev_findings_by_eco_class": {
+        "os": 2176935,
+        "lang": 369061,
+        "other": 20584
+      },
+      "eco_class_pct": {
+        "os": 84.8,
+        "lang": 14.4,
+        "other": 0.8
+      },
+      "sev_findings_top_lang_eco": [
+        [
+          "go",
+          62878
+        ],
+        [
+          "go-module",
+          50890
+        ],
+        [
+          "npm",
+          46651
+        ],
+        [
+          "pypi",
+          36642
+        ],
+        [
+          "binary",
+          36530
+        ],
+        [
+          "gobinary",
+          33418
+        ],
+        [
+          "java-archive",
+          28257
+        ],
+        [
+          "node-pkg",
+          26608
+        ],
+        [
+          "maven",
+          20444
+        ],
+        [
+          "python",
+          14621
+        ],
+        [
+          "python-pkg",
+          8858
+        ],
+        [
+          "dotnet",
+          1549
+        ]
+      ],
+      "n_severe_findings": 2566580
+    }
+  },
+  "mills2023": {
+    "reproduced_analysis": "oldest CVE still present; staleness (vulns vs image age)",
+    "reported": {
+      "oldest_cve_year": 1999,
+      "note": "CVEs back to 1999; staleness effect (younger images carry fewer vulns)"
+    },
+    "ours_random": {
+      "oldest_cve_year": 1999,
+      "staleness_computable": false,
+      "staleness_note": "NOT computable from this snapshot: target.meta carries only repository_namespace/repository_name/tag_name, no last_updated/registry timestamp. Only the oldest-CVE datapoint is reproduced."
+    }
+  },
+  "drdocker2025": {
+    "reproduced_analysis": "% images with a known vulnerability",
+    "reported": {
+      "pct_with_known_vuln": 93.7
+    },
+    "ours_random": {
+      "n_with_vuln": 2786,
+      "pct_with_known_vuln": 96.9
+    }
+  },
+  "dahlmanns2023": {
+    "reproduced_analysis": "secret detector hit rate; private-key category (detector level only, no manual validation)",
+    "reported": {
+      "pct_validated_secret": 8.5,
+      "note": "private keys dominant (52,107 keys); 8.5% is the VALIDATED rate, not detector-level"
+    },
+    "ours_random": {
+      "img_with_secret": 2369,
+      "img_with_secret_pct": 82.4,
+      "img_with_private_key": 1306,
+      "img_with_private_key_pct": 45.4,
+      "img_with_key_broad": 1555,
+      "img_with_key_broad_pct": 54.1,
+      "secret_detector_top": [
+        [
+          "Box",
+          91762
+        ],
+        [
+          "URI",
+          26951
+        ],
+        [
+          "PrivateKey",
+          13274
+        ],
+        [
+          "BingSubscriptionKey",
+          10873
+        ],
+        [
+          "Alchemy",
+          7024
+        ],
+        [
+          "EightxEight",
+          4059
+        ],
+        [
+          "FixerIO",
+          3980
+        ],
+        [
+          "Polygon",
+          3463
+        ],
+        [
+          "FTP",
+          3442
+        ],
+        [
+          "CloudflareApiToken",
+          3415
+        ],
+        [
+          "GitHubOauth2",
+          3397
+        ],
+        [
+          "UnifyID",
+          2359
+        ],
+        [
+          "Gitlab",
+          1733
+        ],
+        [
+          "Confluent",
+          1603
+        ],
+        [
+          "Circle",
+          1567
+        ],
+        [
+          "Postgres",
+          1448
+        ],
+        [
+          "AzureSearchAdminKey",
+          1394
+        ],
+        [
+          "Aiven",
+          1377
+        ],
+        [
+          "Flickr",
+          1332
+        ],
+        [
+          "SentryToken",
+          1143
+        ]
+      ],
+      "n_secret_findings": 204201,
+      "caveat": "detector-level only; manual validation done separately. Comparable to the companion's 76.9% raw detector rate, NOT to Dahlmanns' 8.5% validated rate."
+    }
+  },
+  "figure_data": {
+    "official_vs_community_prevalence": {
+      "groups": [
+        "Official",
+        "Community"
+      ],
+      "reported_liu": [
+        30.0,
+        64.0
+      ],
+      "ours_random": [
+        0.0,
+        96.6
+      ],
+      "n": [
+        0,
+        2876
+      ]
+    },
+    "ecosystem_split": {
+      "classes": [
+        "os",
+        "lang",
+        "other"
+      ],
+      "labels": [
+        "OS packages",
+        "Language",
+        "Other"
+      ],
+      "ours_pct": [
+        84.8,
+        14.4,
+        0.8
+      ],
+      "counts": [
+        2176935,
+        369061,
+        20584
+      ]
+    },
+    "cve_by_year": {
+      "years": [
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025,
+        2026
+      ],
+      "counts": [
+        1,
+        1,
+        1,
+        3,
+        6,
+        5,
+        7,
+        8,
+        34,
+        24,
+        25,
+        69,
+        96,
+        230,
+        406,
+        577,
+        890,
+        1526,
+        2069,
+        1681,
+        1882,
+        2108,
+        2983,
+        4506,
+        3670,
+        4579,
+        4140,
+        3492
+      ]
+    },
+    "worst_severity": {
+      "buckets": [
+        "none",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "pct": [
+        3.1,
+        0.0,
+        0.2,
+        1.4,
+        95.3
+      ]
+    }
+  }
+}

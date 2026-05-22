@@ -1,0 +1,11 @@
+# Python dependencies for the analysis pipeline (analysis/).
+# Tested with Python 3.12 (any Python >= 3.10 works).
+#
+# sqlite3 is part of the Python standard library (no install needed).
+# pymongo is only needed to RE-DRAW the sample (scripts/sample_repos.py); the
+# canonical draw is already shipped as data/random_sample.jsonl, so the analysis
+# scripts do not require it.
+
+matplotlib>=3.7      # figures (analysis/make_figs.py)
+numpy>=1.24          # figures (analysis/make_figs.py)
+pymongo>=4.0         # only to re-draw the sample (scripts/sample_repos.py)
