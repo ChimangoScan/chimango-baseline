@@ -1,8 +1,18 @@
 #!/usr/bin/env python3
-"""Compact, publication-style figures for the random-sample control short paper.
-Shares the companion paper's figstyle. Two ORIGINAL figures only (no figure is
-reused from the companion): a per-image overview (3 panels) and a reachability
-breakdown that is unique to the random sample (the companion has no decay)."""
+"""Compact, publication-style figures for the random-sample baseline short paper.
+Two original figures plus a reproduction panel: a per-image overview (3 panels),
+a reachability breakdown that is unique to the random sample, and a reproduction
+of prior analyses on the random sample.
+
+Data sources, in order of preference:
+  * If the reports database exists (BL_DB points at an existing file), the
+    per-image and reachability panels are computed from it in one streaming pass
+    (full mode).
+  * Otherwise the shipped precomputed arrays (analysis/figdata_baseline.json,
+    produced by analysis/precompute_figdata.py) are used, so every figure
+    regenerates with NO database and no network (precomputed mode, the default).
+The reproduction panel always reads the committed analysis/repro_baseline.json.
+"""
 import json, os, sqlite3
 import matplotlib
 matplotlib.use("Agg")
@@ -11,9 +21,11 @@ import numpy as np
 import figstyle
 
 # Overridable for the artifact: BL_DB = reports SQLite (released on acceptance),
-# BL_FIGS = output directory for the PDFs (default: ./figures).
-DB = os.environ.get("BL_DB", "/mnt/win_ssd/bl_snap.db")
-OUT = os.environ.get("BL_FIGS", "figures")
+# BL_FIGS = output directory for the PDFs (default: ../figures relative here).
+_HERE = os.path.dirname(os.path.abspath(__file__))
+DB = os.environ.get("BL_DB", "/path/to/reports.db")
+OUT = os.environ.get("BL_FIGS", os.path.join(os.path.dirname(_HERE), "figures"))
+FIGDATA = os.path.join(_HERE, "figdata_baseline.json")
 figstyle.apply()
 BLUE, RED, GREEN = "#4575b4", "#b2182b", "#1a9850"
 SEVCOL = [RED, "#f46d43", "#fdae61", "#fee090"]
@@ -28,40 +40,58 @@ def save(fig, name):
     print("wrote", name)
 
 
-# --- pass 1: per-image stats from the scanned reports ---
-vpi = []
-sev = {"critical": 0, "high": 0, "medium": 0, "low": 0}
-cov = {}
-n = anyv = crit = high = secret = 0
-c = sqlite3.connect(f"file:{DB}?immutable=1", uri=True)
-for (rj,) in c.execute("SELECT report_json FROM reports"):
-    r = json.loads(rj); fs = r.get("findings") or []; n += 1
-    ok = len([i for i in (r.get("invocations") or []) if i.get("status") == "ok"])
-    cov[ok] = cov.get(ok, 0) + 1
-    v = 0; ic = ih = isec = False
-    for f in fs:
-        cat = f.get("category")
-        if cat == "pkg-vuln":
-            v += 1
-            s = (f.get("severity") or "unknown").lower()
-            if s in sev: sev[s] += 1
-            ic = ic or s == "critical"; ih = ih or s == "high"
-        elif cat == "secret":
-            isec = True
-    vpi.append(v); anyv += v > 0; crit += ic; high += ih; secret += isec
-N = n
+def from_db():
+    """One streaming pass over the reports + jobs tables (full mode)."""
+    vpi = []
+    sev = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+    cov = {}
+    n = anyv = crit = high = secret = 0
+    c = sqlite3.connect(f"file:{DB}?immutable=1", uri=True)
+    for (rj,) in c.execute("SELECT report_json FROM reports"):
+        r = json.loads(rj); fs = r.get("findings") or []; n += 1
+        ok = len([i for i in (r.get("invocations") or []) if i.get("status") == "ok"])
+        cov[ok] = cov.get(ok, 0) + 1
+        v = 0; ic = ih = isec = False
+        for f in fs:
+            cat = f.get("category")
+            if cat == "pkg-vuln":
+                v += 1
+                s = (f.get("severity") or "unknown").lower()
+                if s in sev: sev[s] += 1
+                ic = ic or s == "critical"; ih = ih or s == "high"
+            elif cat == "secret":
+                isec = True
+        vpi.append(v); anyv += v > 0; crit += ic; high += ih; secret += isec
+    N = n
+    reach = {"scanned": N, "gone": 0, "arch": 0, "auth": 0, "format": 0, "infra": 0}
+    for (st, e) in c.execute("SELECT status, error FROM jobs WHERE status IN ('skipped','failed')"):
+        el = (e or "").lower()
+        if "no space" in el or "register layer" in el or "write /" in el: reach["infra"] += 1
+        elif "no matching manifest" in el or "platform" in el or "no child with platform" in el: reach["arch"] += 1
+        elif any(s in el for s in ("denied", "unauthorized", "forbidden", "authentication required")): reach["auth"] += 1
+        elif any(s in el for s in ("not found", "manifest unknown", "does not exist", "name unknown", "no such", "not known", "failed to resolve", "manifest for")): reach["gone"] += 1
+        else: reach["format"] += 1
+    c.close()
+    return (N, vpi, sev, cov, reach,
+            100*anyv/N, 100*crit/N, 100*high/N, 100*secret/N)
 
-# --- pass 2: reachability outcome of every drawn repository (from jobs) ---
-reach = {"scanned": 0, "gone": 0, "arch": 0, "auth": 0, "format": 0, "infra": 0}
-reach["scanned"] = N
-for (st, e) in c.execute("SELECT status, error FROM jobs WHERE status IN ('skipped','failed')"):
-    el = (e or "").lower()
-    if "no space" in el or "register layer" in el or "write /" in el: reach["infra"] += 1
-    elif "no matching manifest" in el or "platform" in el or "no child with platform" in el: reach["arch"] += 1
-    elif any(s in el for s in ("denied", "unauthorized", "forbidden", "authentication required")): reach["auth"] += 1
-    elif any(s in el for s in ("not found", "manifest unknown", "does not exist", "name unknown", "no such", "not known", "failed to resolve", "manifest for")): reach["gone"] += 1
-    else: reach["format"] += 1
-c.close()
+
+def from_precomputed():
+    """Read the shipped precomputed arrays (precomputed mode, no database)."""
+    d = json.load(open(FIGDATA))
+    p = d["fig_panels3"]
+    cov = {int(k): v for k, v in p["cov"].items()}
+    return (p["N"], p["vpi_sorted"], p["sev"], cov, d["fig_reach"]["reach"],
+            p["anyvuln_pct"], p["crit_pct"], p["high_pct"], p["secret_pct"])
+
+
+# choose the data source: real DB if present, else the precomputed JSON
+if os.path.exists(DB):
+    N, vpi, sev, cov, reach, anyv_pct, crit_pct, high_pct, secret_pct = from_db()
+    print("source: reports database", DB)
+else:
+    N, vpi, sev, cov, reach, anyv_pct, crit_pct, high_pct, secret_pct = from_precomputed()
+    print("source: precomputed", FIGDATA, "(no database)")
 
 # === Fig A: per-image overview, three panels ===
 vpi = np.sort(np.array(vpi)); cdf = np.arange(1, len(vpi)+1)/len(vpi)*100
@@ -105,7 +135,6 @@ ax.set_title("Outcome of a uniform random draw of the Docker Hub namespace", fon
 save(fig, "fig_reach")
 
 # === Fig C: reproduction of prior analyses on the random sample (3 panels) ===
-_HERE = os.path.dirname(os.path.abspath(__file__))
 R = json.load(open(os.path.join(_HERE, "repro_baseline.json"))); FD = R["figure_data"]
 fig, ax = plt.subplots(1, 3, figsize=(6.9, 1.95))
 yrs = FD["cve_by_year"]["years"]; cnts = FD["cve_by_year"]["counts"]
@@ -123,7 +152,7 @@ ax[2].set_xlabel("% of images"); ax[2].set_title("(c) Top vulnerable packages");
 ax[2].tick_params(axis="y", labelsize=6.5)
 fig.tight_layout(w_pad=1.1); save(fig, "fig_repro")
 
-print(f"N={N} anyvuln={100*anyv/N:.1f}% crit={100*crit/N:.1f}% high={100*high/N:.1f}% "
-      f"secret={100*secret/N:.1f}% median={med}")
+print(f"N={N} anyvuln={anyv_pct:.1f}% crit={crit_pct:.1f}% high={high_pct:.1f}% "
+      f"secret={secret_pct:.1f}% median={med}")
 print("reach:", reach, "| scanned%=", round(100*reach['scanned']/sum(reach[k] for _,k,_ in order), 1),
       "gone%=", round(100*reach['gone']/sum(reach[k] for _,k,_ in order), 1))

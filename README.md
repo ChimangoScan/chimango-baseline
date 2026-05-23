@@ -33,6 +33,7 @@ the random sample and reproduces the paper's claims.
 - [Security concerns](#security-concerns)
 - [Installation](#installation)
 - [Minimal test](#minimal-test)
+- [Reproduction](#reproduction)
 - [Experiments](#experiments)
   - [Claim 1 — uniform random draw and reachability](#claim-1--uniform-random-draw-and-reachability)
   - [Claim 2 — near-universal vulnerability](#claim-2--near-universal-vulnerability)
@@ -44,19 +45,25 @@ the random sample and reproduces the paper's claims.
 Repository contents:
 
 ```
-chimango-baseline/
-├── README.md                       this file (CTA artifact template)
+anonymoussystem-baseline/
+├── README.md                       this file (artifact guide)
 ├── LICENSE                         MIT
+├── Makefile                        reproduction entry points (precomputed / full)
+├── reproduce.sh                    reproduction driver (precomputed / full)
 ├── requirements.txt                Python deps for the analysis scripts
 ├── scripts/
 │   └── sample_repos.py             uniform random draw from the crawl (-> data/random_sample.jsonl)
 ├── data/
 │   └── random_sample.jsonl         the canonical 4,800-repository draw (one :latest per repo)
+├── figures/                        regenerated PDFs land here
 └── analysis/
     ├── repro_baseline.py           reproduce prior-work analyses on the random sample
     ├── repro_baseline.md           narrative of the reproduction (per-study)
     ├── repro_baseline.json         numeric output of repro_baseline.py
+    ├── precompute_figdata.py       distil the figure arrays from the DB into figdata_baseline.json
+    ├── figdata_baseline.json       precomputed figure arrays (figures regenerate with no database)
     ├── make_figs.py                paper figures (per-image overview, reachability, reproduction)
+    ├── analyze_extra.py            extra analyses + the scanner-agreement / OS / secret-FP figure
     ├── figstyle.py                 shared matplotlib style
     ├── secret_sample_baseline.py   draw the seeded n=1,100 secret sample (redacted)
     ├── secret_sample_baseline.jsonl seeded secret sample (redacted values + sha256)
@@ -70,24 +77,28 @@ chimango-baseline/
 
 ## Badges considered
 
-We apply for all four SBSeg/SF Selos (badges):
+We apply for all four SBSeg/SF artifact badges:
 
-- **Available (Disponíveis).** This repository is public on GitHub under an open
-  (MIT) license, with a permanent record to be assigned a DOI on acceptance. The
+- **Available.** This repository is public under an open (MIT)
+  license, with a permanent record to be assigned a DOI on acceptance. The
   canonical random draw (`data/random_sample.jsonl`) and the hand-labeled
   secret-validation sample (`analysis/secret_review_baseline.tsv`) are included
   directly.
-- **Functional (Funcionais).** Every script runs from a clean checkout. The
+- **Functional.** Every script runs from a clean checkout. The
   [Minimal test](#minimal-test) exercises the analysis pipeline end-to-end on the
-  small included sample, with no external services and no large download.
-- **Sustainable (Sustentáveis).** The code is small, documented, standard-library
+  small included sample, with no external services and no large download, and
+  `./reproduce.sh precomputed` regenerates every paper figure from the shipped
+  data with no database (see [Reproduction](#reproduction)).
+- **Sustainable.** The code is small, documented, standard-library
   first (only `matplotlib`/`numpy` for figures, `pymongo` only to re-draw the
   sample), and the scanning pipeline is a separately maintained, versioned
   project. Inputs and outputs are plain text/JSON/TSV; every analysis script is
   deterministic and parameterized by environment variables.
-- **Reproducible (Reproduzíveis).** The [Experiments](#experiments) section maps
-  each headline claim of the paper to an exact command, expected runtime,
-  expected resources, and expected result. The secret-validation sample is fixed
+- **Reproducible.** Reproduction is fully automated through a
+  top-level `Makefile` and `reproduce.sh` ([Reproduction](#reproduction)), and
+  the [Experiments](#experiments) section maps each headline claim of the paper
+  to an exact command, expected runtime, expected resources, and expected
+  result. The secret-validation sample is fixed
   by an explicit seed; the random draw is shipped verbatim as the canonical
   record so it does not depend on a server-side `$sample` re-execution.
 
@@ -123,7 +134,7 @@ This artifact has two parts with different requirements:
 **Execution environment used for the paper.**
 
 - Analysis: Python 3.12 on Linux (Ubuntu), x86-64.
-- Scanning: the `ChimangoScan/scanners` pipeline on a small cluster of Linux
+- Scanning: the `AnonymousSystem/scanners` pipeline on a small cluster of Linux
   hosts, each with Docker and the six scanner images; targets pinned to
   `linux/amd64`, images removed after scanning, per-image size capped.
 
@@ -159,7 +170,7 @@ own crawl; the canonical draw is already shipped as `data/random_sample.jsonl`,
 so the analysis and reproduction scripts run without it.
 
 **Scanners (the six-tool battery).** Run as pinned Docker images by the
-`ChimangoScan/scanners` pipeline. The exact registry (image + invocation per
+`AnonymousSystem/scanners` pipeline. The exact registry (image + invocation per
 scanner) is in that repository under `config/scanners.yaml`; the six static
 scanners used for this study are:
 
@@ -223,21 +234,21 @@ public images and reports aggregate, redacted findings.
 Clone and install the Python dependencies for the analyses:
 
 ```bash
-git clone https://github.com/ChimangoScan/chimango-baseline.git
-cd chimango-baseline
+git clone <ANONYMIZED-REPOSITORY-URL> anonymoussystem-baseline
+cd anonymoussystem-baseline
 python3 -m pip install -r requirements.txt   # matplotlib, numpy (+ pymongo to re-draw)
 ```
 
 That is everything needed for the [Minimal test](#minimal-test), Claim 1, and to
 inspect the precomputed outputs of Claims 2–4.
 
-**To re-run the scan (optional; produces `bl_snap.db`).** The six-scanner
-pipeline is a separate, reusable project — **`ChimangoScan/scanners`** — and is
-*not* duplicated here. Install and point it at this repository's sample:
+**To re-run the scan (optional; produces the reports SQLite).** The six-scanner
+pipeline is a separate, reusable project — **`AnonymousSystem/scanners`** — and
+is *not* duplicated here. Install and point it at this repository's sample:
 
 ```bash
 # 1. get the pipeline (Python >= 3.10, uv, and a working Docker daemon)
-git clone https://github.com/ChimangoScan/scanners.git
+git clone <ANONYMIZED-SCANNERS-REPOSITORY-URL> scanners
 cd scanners && uv sync
 
 # 2. configure: copy the example config and point source.path at our sample,
@@ -250,7 +261,7 @@ Then set, in `scanners`' `config/config.yaml`:
 ```yaml
 source:
   type: jsonl
-  path: /path/to/chimango-baseline/data/random_sample.jsonl
+  path: /path/to/anonymoussystem-baseline/data/random_sample.jsonl
 scanners:
   only: [syft, trivy, grype, osv, dockle, trufflehog]   # the six-tool battery
   static: true
@@ -270,13 +281,14 @@ uv run scanners report     # consolidate into out/_corpus/ (findings, metrics, r
 ```
 
 `scanners` writes one consolidated `report.json` per target plus a corpus-level
-store; `bl_snap.db` is that per-image report store (table `reports(image,
-report_json)`, table `jobs(status, error)`), which the analysis scripts in this
-repository read. See the `scanners` README and `docs/` for the distributed
-(many-machine) workflow, the Docker Hub account pool, and resuming a run. A
-baseline-specific config (the six-scanner, static-only, `remove_image_after`
-profile above) is the only configuration this study adds on top of the pipeline's
-defaults; it is reproduced inline here so the repository is self-contained.
+store; the reports SQLite (`bl_snap.db`) is that per-image report store (table
+`reports(image, report_json)`, table `jobs(status, error)`), which the analysis
+scripts in this repository read. See the `scanners` README and `docs/` for the
+distributed (many-machine) workflow, the Docker Hub account pool, and resuming a
+run. A baseline-specific config (the six-scanner, static-only,
+`remove_image_after` profile above) is the only configuration this study adds on
+top of the pipeline's defaults; it is reproduced inline here so the repository is
+self-contained.
 
 ---
 
@@ -301,12 +313,12 @@ PY
 python3 - <<'PY'
 import json
 R = json.load(open("analysis/repro_baseline.json"))
-assert R["meta"]["n_reports"] == 2876
-assert R["drdocker2025"]["ours_random"]["pct_with_known_vuln"] == 96.9
+assert R["meta"]["n_reports"] == 2879
+assert R["drdocker2025"]["ours_random"]["pct_with_known_vuln"] == 96.8
 assert R["liu2020"]["ours_random"]["n_official"] == 0
 V = json.load(open("analysis/secret_validation_baseline.json"))
 assert V["true_positives"] == 5 and V["sample_size"] == 1100
-print("OK: committed outputs match the paper (N=2876, 96.9%% any-vuln, "
+print("OK: committed outputs match the paper (N=2879, 96.8%% any-vuln, "
       "0 official, 5/1100 secret TPs)")
 PY
 ```
@@ -315,26 +327,90 @@ Expected output:
 
 ```
 OK: random_sample.jsonl has 4800 repositories
-OK: committed outputs match the paper (N=2876, 96.9% any-vuln, 0 official, 5/1100 secret TPs)
+OK: committed outputs match the paper (N=2879, 96.8% any-vuln, 0 official, 5/1100 secret TPs)
 ```
 
 If both lines print, the environment is ready and the committed data parses. (To
-additionally render a figure, run `python3 analysis/make_figs.py` after
-`pip install -r requirements.txt`; it uses the committed `repro_baseline.json`
-for its reproduction panel and only needs the database for the per-image and
-reachability panels.)
+additionally render every paper figure with no database, run
+`pip install -r requirements.txt && ./reproduce.sh precomputed`; the figure
+scripts read the committed `analysis/repro_baseline.json` and
+`analysis/figdata_baseline.json` and write the PDFs into `figures/`. See
+[Reproduction](#reproduction).)
+
+---
+
+## Reproduction
+
+Reproduction is fully automated, via a top-level `Makefile` and `reproduce.sh`,
+in two modes.
+
+### Precomputed (no database, no network) — recommended
+
+Regenerates **every paper figure** and re-checks the headline numbers from the
+**shipped data only**. No external database, no network, no Docker.
+
+```bash
+python3 -m pip install -r requirements.txt   # matplotlib, numpy
+./reproduce.sh precomputed                    # or:  make precomputed
+```
+
+This (1) validates `data/random_sample.jsonl` (4,800 rows) and the committed
+outputs (`repro_baseline.json` N=2879 / 96.8% any-vuln / 0 official,
+`secret_validation_baseline.json` 5/1100 TPs), then (2) runs
+`analysis/make_figs.py` and `analysis/analyze_extra.py`, which read the shipped
+precomputed arrays (`analysis/figdata_baseline.json`, distilled from the reports
+database by `analysis/precompute_figdata.py`) and the committed
+`analysis/repro_baseline.json`, and write the figures into `figures/`:
+
+```
+figures/fig_panels3.pdf   per-image overview (vulns/image CDF, severity mix, scanner coverage)
+figures/fig_reach.pdf     reachability of a uniform random draw (Scanned / Gone / ...)
+figures/fig_repro.pdf     reproduction of prior analyses (CVEs-by-year, ecosystem, top packages)
+figures/fig_extra.pdf     scanner agreement, base-OS distribution, secret false-positive types
+```
+
+The scripts print the headline line `N=2879 anyvuln=96.8% crit=94.4% ...`,
+matching the paper. Expected runtime: a few seconds after install. Expected
+resources: only Python + matplotlib (no database, ~no RAM).
+
+### Full (run the pipeline end-to-end)
+
+Draws a uniform random sample of `N` repositories and runs the six-scanner
+pipeline at configurable scale, then recomputes the committed outputs and
+figures from the resulting reports database.
+
+```bash
+./reproduce.sh full --n 20                    # or:  make full N=20
+./reproduce.sh full --n 20 --db /path/to/bl_snap.db   # analyze an existing DB
+```
+
+Full mode needs a working **Docker** daemon and the separate scanner pipeline
+(`AnonymousSystem/scanners`; see [Installation](#installation)); set
+`SCANNERS_DIR` to its checkout, and `MONGO_URI` to draw a fresh sample from a
+crawl (otherwise the first `N` rows of the shipped canonical draw are used so
+the pipeline can still be exercised). The default `N` is small so it runs on a
+laptop. **Full-scale reproduction** (the paper's 4,800-repository draw, ~9.7 GB
+of reports across the six tools) is bandwidth- and disk-bound and was run across
+several machines — that scale needs the authors' multi-machine setup, but the
+exact commands and the baseline-specific scanner configuration are documented in
+full under [Installation](#installation). Once a reports database exists, point
+the analysis at it with `--db` / `BL_DB` to recompute every committed output and
+figure from scratch.
+
+The per-Claim commands below give the exact invocation, expected runtime,
+resources, and expected result for each headline claim of the paper.
 
 ---
 
 ## Experiments
 
-Each subsection reproduces one **Claim (Reivindicação)** of the paper. Claims 2–4
+Each subsection reproduces one **Claim** of the paper. Claims 2–4
 read the full reports database `bl_snap.db` (~9.7 GB, **released on acceptance**);
-point the scripts at it with the `BL_DB` environment variable (default
-`/mnt/win_ssd/bl_snap.db`). Outputs are written next to the scripts unless
-`BL_OUT` is set. The committed `analysis/*.json` / `*.tsv` are the precomputed
-results, so the headline numbers can be checked even before the database is
-available.
+point the scripts at it with the `BL_DB` environment variable (e.g.
+`/path/to/bl_snap.db`). Outputs are written next to the scripts unless
+`BL_OUT` is set. The committed `analysis/*.json` / `*.tsv` (and the precomputed
+`analysis/figdata_baseline.json`) are the precomputed results, so the headline
+numbers and every figure can be reproduced even before the database is available.
 
 > Conventions: `BL_DB` = path to `bl_snap.db`; `BL_OUT` = output directory
 > (default: the script's own directory); `BL_FIGS` = figure directory (default
@@ -342,14 +418,16 @@ available.
 
 ### Claim 1 — uniform random draw and reachability
 
-> **4,800 repositories were drawn uniformly at random; 2,876 were scanned
-> (59.9%); 35.3% of the drawn repositories are already gone (deleted/renamed).**
+> **4,800 repositories were drawn uniformly at random; 2,879 were scanned
+> (60.0%); 34.9% of the drawn repositories are already gone (deleted/renamed).**
 
 - **What it shows.** The sampling design and the reachability breakdown of a
   uniform random draw of the Docker Hub namespace (a result unique to a random
   sample: the popular head hides this decay).
-- **No database needed for the design;** the reachability breakdown needs the
-  `jobs` table in `bl_snap.db`.
+- **No database needed:** the reachability breakdown is precomputed into
+  `analysis/figdata_baseline.json`, so the figure regenerates without
+  `bl_snap.db`. The database is only needed to recompute it from scratch (full
+  mode).
 
 Verify the draw size (no database, instant):
 
@@ -366,54 +444,64 @@ MONGO_URI=mongodb://127.0.0.1:27017 SAMPLE_N=4800 \
   OUT_PATH=data/random_sample.repro.jsonl python3 scripts/sample_repos.py
 ```
 
-Reachability breakdown + the reachability figure (needs `bl_snap.db`):
+Reachability breakdown + the reachability figure (precomputed; no database):
 
 ```bash
-BL_DB=/path/to/bl_snap.db BL_FIGS=figures python3 analysis/make_figs.py
+python3 analysis/make_figs.py                       # uses figdata_baseline.json
+BL_DB=/path/to/bl_snap.db python3 analysis/make_figs.py   # full mode (from DB)
 ```
 
-- **Expected runtime:** seconds for `wc`; ~3–4 minutes for `make_figs.py` (one
-  streaming pass over the reports plus the `jobs` table).
-- **Expected resources:** ~2–4 GB RAM; the ~9.7 GB database on local disk.
+- **Expected runtime:** seconds for `wc`; seconds for `make_figs.py` in
+  precomputed mode (~3–4 minutes in full mode: one streaming pass over the
+  reports plus the `jobs` table).
+- **Expected resources:** precomputed mode needs only Python + matplotlib; full
+  mode needs ~2–4 GB RAM and the ~9.7 GB database on local disk.
 - **Expected result.** `data/random_sample.jsonl` has 4,800 rows. `make_figs.py`
-  prints the per-image summary line (`N=2876 ...`) and a `reach:` line; it writes
-  `figures/fig_reach.pdf`, whose bands are **Scanned ≈ 59.9%** and **Gone (404)
-  ≈ 35.3%**, with the remainder split across non-image (OCI artifact), private,
-  and other-architecture outcomes. 2,876 / 4,800 = 59.9% scanned.
+  prints the per-image summary line (`N=2879 ...`) and a `reach:` line; it writes
+  `figures/fig_reach.pdf`, whose bands are **Scanned ≈ 60%** and **Gone (404)
+  ≈ 35%**, with the remainder split across non-image (OCI artifact), private,
+  and other-architecture outcomes. 2,879 / 4,800 = 60.0% scanned.
 
 ### Claim 2 — near-universal vulnerability
 
-> **Vulnerability is near-universal: 94.5% of scanned images carry a critical
-> vulnerability, 96.9% carry any known vulnerability, with a median of 948
+> **Vulnerability is near-universal: 94.4% of scanned images carry a critical
+> vulnerability, 96.8% carry any known vulnerability, with a median of 947
 > package vulnerabilities per image.**
 
 - **What it shows.** The headline security posture of the typical image, and the
   reproduction of prior Docker Hub vulnerability studies on a uniform random
   sample.
-- **Needs `bl_snap.db`.**
+- **Figures regenerate with no database** from the precomputed
+  `analysis/figdata_baseline.json` and `analysis/repro_baseline.json`; the
+  database is only needed to recompute those committed outputs from scratch.
 
 ```bash
-# (a) reproduction pass: prevalence, severity mix, vulns/image, CVEs-by-year,
-#     top vulnerable packages, ecosystem split  ->  analysis/repro_baseline.json
-BL_DB=/path/to/bl_snap.db BL_OUT=analysis python3 analysis/repro_baseline.py
+# (a) the per-image figures (vulns/image CDF, severity mix, scanner coverage,
+#     CVE-by-year, severe-by-ecosystem, top vulnerable packages), no database
+python3 analysis/make_figs.py
+python3 analysis/analyze_extra.py
 
-# (b) the per-image figures (vulns/image CDF, severity mix, scanner coverage,
-#     CVE-by-year, severe-by-ecosystem, top vulnerable packages)
-BL_DB=/path/to/bl_snap.db BL_FIGS=figures python3 analysis/make_figs.py
+# (b) recompute the committed outputs from scratch (full mode, needs the DB):
+#     the reproduction pass and the precomputed figure arrays
+BL_DB=/path/to/bl_snap.db BL_OUT=analysis python3 analysis/repro_baseline.py
+BL_DB=/path/to/bl_snap.db BL_OUT=analysis python3 analysis/precompute_figdata.py
+BL_DB=/path/to/bl_snap.db python3 analysis/make_figs.py
 ```
 
-- **Expected runtime:** ~3–4 minutes each (one streaming pass over ~2,876
-  reports; `repro_baseline.py` took ~190 s for the paper).
-- **Expected resources:** ~2–4 GB RAM; the ~9.7 GB database on local disk.
+- **Expected runtime:** seconds in precomputed mode; ~3–4 minutes each in full
+  mode (one streaming pass over ~2,879 reports; `repro_baseline.py` took ~130 s
+  for the paper).
+- **Expected resources:** precomputed mode needs only Python + matplotlib; full
+  mode needs ~2–4 GB RAM and the ~9.7 GB database on local disk.
 - **Expected result.** `make_figs.py` prints, e.g.,
-  `N=2876 anyvuln=96.9% crit=94.5% high=... secret=82.4% median=948`. In
+  `N=2879 anyvuln=96.8% crit=94.4% high=96.1% secret=82.4% median=947`. In
   `analysis/repro_baseline.json`: `drdocker2025.ours_random.pct_with_known_vuln`
-  = **96.9%** (any known vulnerability); the worst-severity bucket is modal
-  **critical** (≈95%); `zerouali2019.ours_random.median_merged` = **948.5**
+  = **96.8%** (any known vulnerability); the worst-severity bucket is modal
+  **critical** (≈94%); `zerouali2019.ours_random.median_merged` = **947.0**
   (median package vulnerabilities per image, merged across the three SCA tools);
   the top vulnerable packages are core OS libraries (`zlib`, `openssl`, `tar`,
   …). The committed `analysis/repro_baseline.json` already contains these
-  numbers, so they can be inspected without re-running. (The ~94.5% *critical*
+  numbers, so they can be inspected without re-running. (The ~94.4% *critical*
   figure is the share of images with at least one critical package vulnerability;
   the closely related worst-severity-modal-critical share is also reported.)
 
@@ -445,9 +533,15 @@ BL_DB=/path/to/bl_snap.db BL_OUT=analysis python3 analysis/secret_sample_baselin
 BL_DB=/path/to/bl_snap.db BL_OUT=analysis python3 analysis/validate_secrets_baseline.py
 ```
 
+The committed `analysis/secret_validation_baseline.json` and
+`analysis/secret_review_baseline.tsv` are the frozen ground truth used in the
+paper (the hand verdicts, keyed by detector and file path, are recorded in
+`analysis/validate_secrets_baseline.py`); the rebuild re-derives the seeded
+sample and re-attaches those verdicts to reproduce the methodology.
+
 - **Expected runtime:** instant for the committed-file checks; ~3–5 minutes each
-  for the two rebuild scripts (one streaming pass each over all ~169,528 secret
-  detections).
+  for the two rebuild scripts (one streaming pass each over the full secret
+  detection population, of order 1.7–2 × 10^5 detections).
 - **Expected resources:** ~2–4 GB RAM; the ~9.7 GB database on local disk for the
   rebuild only.
 - **Expected result.** The raw detector hit rate is **82.4%** of scanned images
@@ -476,7 +570,7 @@ Verify from committed output (no database, instant):
 python3 -c "import json;d=json.load(open('analysis/repro_baseline.json'));\
 o=d['liu2020']['ours_random'];\
 print('official=%d community=%d community_high_or_critical=%.1f%%' % (o['n_official'],o['n_community'],o['community_hc_pct']))"
-# -> official=0 community=2876 community_high_or_critical=96.6%
+# -> official=0 community=2879 community_high_or_critical=96.4%
 ```
 
 Reproduce from the database:
@@ -490,9 +584,9 @@ BL_DB=/path/to/bl_snap.db BL_OUT=analysis python3 analysis/repro_baseline.py
   regenerate `repro_baseline.json`.
 - **Expected resources:** as Claim 2.
 - **Expected result.** `liu2020.ours_random.n_official` = **0** and
-  `n_community` = **2,876**: no `library/` image is present, so Liu's
+  `n_community` = **2,879**: no `library/` image is present, so Liu's
   official-vs-community split is **not reproducible** on a uniform sample (the
-  community side alone is ~96.9% high/critical). `analysis/repro_baseline.md`
+  community side alone is ~96.4% high/critical). `analysis/repro_baseline.md`
   narrates this per study.
 
 ---
@@ -503,7 +597,7 @@ See [Repository contents](#readme-structure) above for the file tree. In short:
 `scripts/` draws the sample; `data/` holds the canonical draw; `analysis/` holds
 the reproduction and figure scripts plus their committed outputs and the
 hand-labeled secret sample. The six-scanner pipeline that produces the reports
-database is the separate `ChimangoScan/scanners` project (see
+database is the separate `AnonymousSystem/scanners` project (see
 [Installation](#installation)).
 
 ---

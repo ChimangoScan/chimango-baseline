@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 Ground-truth validation of TruffleHog secret detections on the baseline corpus
-(bl_snap.db). Replicates the main ChimangoScan paper's manual FP-validation
-(Section 4.5) at the same sample size (n=1100).
+(the reports SQLite). Replicates the companion high-exposure paper's manual
+FP-validation at the same sample size (n=1100).
 
 WHAT THIS SCRIPT IS (AND IS NOT)
 --------------------------------
@@ -58,7 +58,7 @@ import os, sqlite3, json, re, math, csv, random, hashlib
 from collections import Counter
 
 # BL_DB / BL_OUT overridable for the artifact (DB released on acceptance).
-DB = os.environ.get("BL_DB", "/mnt/win_ssd/bl_snap.db")
+DB = os.environ.get("BL_DB", "/path/to/reports.db")
 OUT = os.environ.get("BL_OUT", os.path.dirname(os.path.abspath(__file__)))
 SEED = 20260522
 N_SAMPLE = 1100

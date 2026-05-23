@@ -5,8 +5,8 @@ sample (control group), mirroring the companion paper's "Reproducing Prior
 Docker Hub Analyses" section (tab:repro) but over the random sample instead of
 the high-exposure head.
 
-One read-only streaming pass over bl_snap.db (reports table). Methodology is
-copied from chimangoscan-paper/recount_repo.py so the two are like-for-like:
+One read-only streaming pass over the reports SQLite (reports table).
+Methodology mirrors the companion paper's recount so the two are like-for-like:
   - severity rank unknown<info<low<medium<high<critical
   - worst-severity per image computed over pkg-vuln findings only
   - clair findings skipped; dockle high -> critical; osv unknown severities
@@ -39,10 +39,9 @@ from collections import Counter, defaultdict
 #   BL_OUT     output directory for repro_baseline.json/.md (default: this dir)
 #   OSV_CACHE  optional osv_severity_cache.json (severity backfill); if absent,
 #              osv unknown severities are simply left as unknown.
-DB = os.environ.get("BL_DB", "/mnt/win_ssd/bl_snap.db")
+DB = os.environ.get("BL_DB", "/path/to/reports.db")
 OUTDIR = os.environ.get("BL_OUT", os.path.dirname(os.path.abspath(__file__)))
-CACHE = os.environ.get("OSV_CACHE",
-                       "/mnt/win_ssd/chimangoscan-paper/osv_severity_cache.json")
+CACHE = os.environ.get("OSV_CACHE", "")
 
 SEV_RANK = {"unknown": 0, "info": 1, "low": 2, "medium": 3, "high": 4,
             "critical": 5}

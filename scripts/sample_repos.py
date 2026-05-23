@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""Amostra uniforme aleatória de repositórios do Docker Hub (grupo de controle).
+"""Uniform random sample of Docker Hub repositories (the control group).
 
-Sorteia N repos de dockerhub_data.repositories_data (Mongo do crawl) com $sample
-(amostragem uniforme server-side) e emite um JSONL repo:tag (uma imagem :latest
-por repo) no formato que a pipeline de scan consome. A lista emitida É o registro
-canônico da amostra (reprodutibilidade pela lista, já que $sample não tem semente).
+Draws N repositories from dockerhub_data.repositories_data (the crawl's MongoDB)
+with $sample (server-side uniform sampling) and emits a repo:tag JSONL (one
+:latest image per repo) in the format the scan pipeline consumes. The emitted
+list IS the canonical record of the sample (reproducibility is by the list
+itself, since $sample takes no seed).
 
 Env:
   MONGO_URI    (default mongodb://127.0.0.1:27017)
-  SAMPLE_N     nº de repos a sortear (default 4800 -> ~2401 escaneados após skips)
+  SAMPLE_N     number of repositories to draw (default 4800 -> ~2879 scanned
+               after skips)
   OUT_PATH     (default data/random_sample.jsonl)
 """
 import json
@@ -21,7 +23,7 @@ OUT = os.environ.get("OUT_PATH", "data/random_sample.jsonl")
 
 
 def pull_int(pc):
-    """pull_count vem como {high, low, unsigned} (Long do Mongo) ou int."""
+    """pull_count arrives as {high, low, unsigned} (a Mongo Long) or as an int."""
     if isinstance(pc, dict):
         return (int(pc.get("high", 0)) << 32) + int(pc.get("low", 0))
     try:
@@ -46,7 +48,7 @@ def main():
             nm = d.get("name") or ""
             if not nm:
                 continue
-            # repo:tag no mesmo formato do ranker (library -> só o nome)
+            # repo:tag in the same format as the ranker (library -> name only)
             rt = nm if ns == "library" else (ns + "/" + nm if ns else nm)
             obj = {
                 "repository_namespace": ns,
@@ -58,7 +60,7 @@ def main():
             f.write(json.dumps(obj, separators=(",", ":")) + "\n")
             n += 1
     cli.close()
-    print("amostra escrita: %d repos -> %s" % (n, OUT))
+    print("sample written: %d repositories -> %s" % (n, OUT))
 
 
 if __name__ == "__main__":

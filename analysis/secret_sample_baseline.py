@@ -3,15 +3,15 @@
 Extract ALL TruffleHog secret detections from the baseline snapshot and draw a
 reproducible random sample for ground-truth false-positive validation.
 
-This mirrors the methodology of the main ChimangoScan paper (Section 4.5,
-secret_sample.py + validate_secrets.py) but runs over the *baseline* corpus
-snapshot (bl_snap.db) and uses an explicit fixed-seed `random.Random(seed).sample`
+This mirrors the methodology of the companion high-exposure paper (manual
+secret FP-validation) but runs over the *baseline* corpus snapshot (the reports
+SQLite) and uses an explicit fixed-seed `random.Random(seed).sample`
 over the full, materialised population (not reservoir sampling) so the sample is
 exactly reproducible from the seed alone.
 
 REPRODUCIBILITY
 ---------------
-* DB        : /mnt/win_ssd/bl_snap.db, table reports(image, report_json).
+* DB        : the reports SQLite, table reports(image, report_json).
 * Secret    : findings[] entries with category == "secret". Fields used:
                 id / title  -> TruffleHog detector name (e.g. Box, AWS, PrivateKey)
                 description -> matched / (sometimes) redacted value
@@ -19,12 +19,12 @@ REPRODUCIBILITY
                 target_image-> image reference
                 severity    -> finding severity
 * Verified? : the finding schema has NO `verified`/`Verified` field (checked over
-              all 169,528 detections; see secret_validation_baseline.json
+              every detection; see secret_validation_baseline.json
               -> "active_verification"). TruffleHog ran in *unverified* mode, so
               we have no live-verification signal; this is recorded explicitly and
               the validation is purely manual/heuristic ground truth.
 * Seed      : SEED = 20260522, sampler = random.Random(SEED).sample(population, n).
-* n         : N_SAMPLE = 1100 (uniform random, same size as the main paper:
+* n         : N_SAMPLE = 1100 (uniform random, same size as the companion paper:
               95% CI, +-3% on a proportion; or the whole population if smaller).
 
 SECRET REDACTION
@@ -48,7 +48,7 @@ import os, sqlite3, json, re, random, hashlib, math
 from collections import Counter
 
 # BL_DB / BL_OUT overridable for the artifact (DB released on acceptance).
-DB = os.environ.get("BL_DB", "/mnt/win_ssd/bl_snap.db")
+DB = os.environ.get("BL_DB", "/path/to/reports.db")
 OUT = os.environ.get("BL_OUT", os.path.dirname(os.path.abspath(__file__)))
 SEED = 20260522
 N_SAMPLE = 1100

@@ -1,11 +1,11 @@
 {
   "meta": {
     "sample": "uniform-random baseline (control group)",
-    "db": "/mnt/win_ssd/bl_snap.db",
-    "n_reports": 2876,
+    "db": "/path/to/reports.db",
+    "n_reports": 2879,
     "n_official": 0,
-    "n_community": 2876,
-    "elapsed_s": 189.9,
+    "n_community": 2879,
+    "elapsed_s": 128.6,
     "caveats": "Directional only: scanner battery (trivy/grype/osv merged, not deduplicated), sample (uniform random vs each study's sample) and elapsed time all differ from the cited studies. Per-image vuln counts are the merged raw pkg-vuln count (inflates the mean; medians reported alongside and a deduplicated-distinct count given as robustness)."
   },
   "shu2017": {
@@ -19,16 +19,16 @@
     "ours_random": {
       "worst_severity_modal": "critical",
       "worst_severity_pct": {
-        "none": 3.1,
+        "none": 3.2,
         "low": 0.0,
-        "medium": 0.2,
-        "high": 1.4,
-        "critical": 95.3
+        "medium": 0.3,
+        "high": 2.0,
+        "critical": 94.4
       },
-      "vuln_median_merged": 948.5,
-      "vuln_mean_merged": 2942.1,
+      "vuln_median_merged": 947.0,
+      "vuln_mean_merged": 2939.0,
       "vuln_max_merged": 26511,
-      "vuln_median_distinct": 564.0,
+      "vuln_median_distinct": 562.0,
       "n_distinct_cves": 35019,
       "oldest_cve_year": 1999,
       "pct_cves_2020plus": 72.8,
@@ -36,23 +36,23 @@
         {
           "package": "zlib",
           "vuln_images": 2605,
-          "pct_corpus": 90.6,
+          "pct_corpus": 90.5,
           "findings": 9191,
           "cves": 10,
-          "images_with_critical": 1638
+          "images_with_critical": 1357
         },
         {
           "package": "openssl",
           "vuln_images": 2480,
-          "pct_corpus": 86.2,
+          "pct_corpus": 86.1,
           "findings": 178199,
           "cves": 219,
-          "images_with_critical": 1970
+          "images_with_critical": 1929
         },
         {
           "package": "tar",
           "vuln_images": 2107,
-          "pct_corpus": 73.3,
+          "pct_corpus": 73.2,
           "findings": 29867,
           "cves": 27,
           "images_with_critical": 0
@@ -68,7 +68,7 @@
         {
           "package": "ncurses-base",
           "vuln_images": 1736,
-          "pct_corpus": 60.4,
+          "pct_corpus": 60.3,
           "findings": 17508,
           "cves": 30,
           "images_with_critical": 57
@@ -76,7 +76,7 @@
         {
           "package": "coreutils",
           "vuln_images": 1702,
-          "pct_corpus": 59.2,
+          "pct_corpus": 59.1,
           "findings": 9129,
           "cves": 9,
           "images_with_critical": 0
@@ -84,18 +84,18 @@
         {
           "package": "ncurses",
           "vuln_images": 1690,
-          "pct_corpus": 58.8,
+          "pct_corpus": 58.7,
           "findings": 44738,
           "cves": 29,
-          "images_with_critical": 502
+          "images_with_critical": 476
         },
         {
           "package": "systemd",
           "vuln_images": 1668,
-          "pct_corpus": 58.0,
+          "pct_corpus": 57.9,
           "findings": 61613,
           "cves": 53,
-          "images_with_critical": 155
+          "images_with_critical": 144
         },
         {
           "package": "libc6",
@@ -108,7 +108,7 @@
         {
           "package": "libc-bin",
           "vuln_images": 1630,
-          "pct_corpus": 56.7,
+          "pct_corpus": 56.6,
           "findings": 61812,
           "cves": 131,
           "images_with_critical": 960
@@ -125,14 +125,14 @@
       "note": "Debian-based images, all severities; effectively 100% affected"
     },
     "ours_random": {
-      "median_merged": 948.5,
-      "mean_merged": 2942.1,
+      "median_merged": 947.0,
+      "mean_merged": 2939.0,
       "max_merged": 26511,
       "min_merged": 0,
-      "median_distinct": 564.0,
-      "mean_distinct": 1745.0,
+      "median_distinct": 562.0,
+      "mean_distinct": 1743.2,
       "max_distinct": 19908,
-      "pct_images_with_vuln": 96.9
+      "pct_images_with_vuln": 96.8
     }
   },
   "liu2020": {
@@ -144,11 +144,11 @@
     },
     "ours_random": {
       "n_official": 0,
-      "n_community": 2876,
+      "n_community": 2879,
       "official_high_or_crit": 0,
-      "community_high_or_crit": 2779,
+      "community_high_or_crit": 2776,
       "official_hc_pct": 0.0,
-      "community_hc_pct": 96.6,
+      "community_hc_pct": 96.4,
       "caveat": "random sample has very few official images (N=0); the official percentage is a small-sample estimate"
     }
   },
@@ -159,19 +159,19 @@
     },
     "ours_random": {
       "sev_findings_by_eco_class": {
-        "os": 2176935,
-        "lang": 369061,
+        "os": 1926616,
+        "lang": 362945,
         "other": 20584
       },
       "eco_class_pct": {
-        "os": 84.8,
-        "lang": 14.4,
-        "other": 0.8
+        "os": 83.4,
+        "lang": 15.7,
+        "other": 0.9
       },
       "sev_findings_top_lang_eco": [
         [
           "go",
-          62878
+          57599
         ],
         [
           "go-module",
@@ -182,12 +182,12 @@
           46651
         ],
         [
-          "pypi",
-          36642
-        ],
-        [
           "binary",
           36530
+        ],
+        [
+          "pypi",
+          35805
         ],
         [
           "gobinary",
@@ -218,7 +218,7 @@
           1549
         ]
       ],
-      "n_severe_findings": 2566580
+      "n_severe_findings": 2310145
     }
   },
   "mills2023": {
@@ -240,7 +240,7 @@
     },
     "ours_random": {
       "n_with_vuln": 2786,
-      "pct_with_known_vuln": 96.9
+      "pct_with_known_vuln": 96.8
     }
   },
   "dahlmanns2023": {
@@ -250,32 +250,32 @@
       "note": "private keys dominant (52,107 keys); 8.5% is the VALIDATED rate, not detector-level"
     },
     "ours_random": {
-      "img_with_secret": 2369,
+      "img_with_secret": 2372,
       "img_with_secret_pct": 82.4,
-      "img_with_private_key": 1306,
-      "img_with_private_key_pct": 45.4,
-      "img_with_key_broad": 1555,
+      "img_with_private_key": 1309,
+      "img_with_private_key_pct": 45.5,
+      "img_with_key_broad": 1558,
       "img_with_key_broad_pct": 54.1,
       "secret_detector_top": [
         [
           "Box",
-          91762
+          92393
         ],
         [
           "URI",
-          26951
+          27111
         ],
         [
           "PrivateKey",
-          13274
+          13324
         ],
         [
           "BingSubscriptionKey",
-          10873
+          10913
         ],
         [
           "Alchemy",
-          7024
+          7676
         ],
         [
           "EightxEight",
@@ -283,15 +283,15 @@
         ],
         [
           "FixerIO",
-          3980
+          3988
         ],
         [
           "Polygon",
-          3463
+          3485
         ],
         [
           "FTP",
-          3442
+          3448
         ],
         [
           "CloudflareApiToken",
@@ -303,23 +303,23 @@
         ],
         [
           "UnifyID",
-          2359
+          2361
         ],
         [
           "Gitlab",
-          1733
+          1735
+        ],
+        [
+          "Circle",
+          1676
         ],
         [
           "Confluent",
           1603
         ],
         [
-          "Circle",
-          1567
-        ],
-        [
           "Postgres",
-          1448
+          1478
         ],
         [
           "AzureSearchAdminKey",
@@ -327,18 +327,18 @@
         ],
         [
           "Aiven",
-          1377
+          1383
         ],
         [
           "Flickr",
-          1332
+          1339
         ],
         [
           "SentryToken",
-          1143
+          1153
         ]
       ],
-      "n_secret_findings": 204201,
+      "n_secret_findings": 206096,
       "caveat": "detector-level only; manual validation done separately. Comparable to the companion's 76.9% raw detector rate, NOT to Dahlmanns' 8.5% validated rate."
     }
   },
@@ -354,11 +354,11 @@
       ],
       "ours_random": [
         0.0,
-        96.6
+        96.4
       ],
       "n": [
         0,
-        2876
+        2879
       ]
     },
     "ecosystem_split": {
@@ -373,13 +373,13 @@
         "Other"
       ],
       "ours_pct": [
-        84.8,
-        14.4,
-        0.8
+        83.4,
+        15.7,
+        0.9
       ],
       "counts": [
-        2176935,
-        369061,
+        1926616,
+        362945,
         20584
       ]
     },
@@ -454,11 +454,11 @@
         "critical"
       ],
       "pct": [
-        3.1,
+        3.2,
         0.0,
-        0.2,
-        1.4,
-        95.3
+        0.3,
+        2.0,
+        94.4
       ]
     }
   }
