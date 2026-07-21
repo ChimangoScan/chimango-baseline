@@ -42,8 +42,12 @@ z=1.21 (p=0.23); oldest CVE 1999; 0 official repositories.
 
 - **Secret sample snapshot (verified empirically).** The committed
   1,100-detection sample (`secret_sample_baseline.jsonl`, seed 20260522) was
-  drawn when the corpus had 169,528 secret detections; the released database
-  has 206,096 (the corpus grew before the freeze). Three measured facts:
+  drawn while the scan campaign was still running: reconstructing the corpus
+  by each report's `finished_at`, the cumulative detection count crosses
+  exactly 169,528 (across exactly 2,067 images) at 2026-05-22 08:10, the
+  moment of the draw; the last report finished at 12:04 the same day, closing
+  the corpus at 206,096 detections across 2,372 images. Hand-labeling began
+  from that mid-campaign draw. Three measured facts:
   (1) the draw itself is deterministic: two runs of
   `secret_sample_baseline.py` against the released `bl_snap.db` produce
   byte-identical output; (2) that fresh draw differs from the committed sample
