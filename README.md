@@ -355,12 +355,13 @@ in two modes.
 
 ### Precomputed (no database, no network) — recommended
 
+
 Regenerates **every paper figure** and re-checks the headline numbers from the
 **shipped data only**. No external database, no network, no Docker.
 
 ```bash
 python3 -m pip install -r requirements.txt   # matplotlib, numpy
-./reproduce.sh precomputed                    # or:  make precomputed
+./reproduce.sh precomputed                    # or:  make precomputed   (~15 s)
 ```
 
 This (1) validates `data/random_sample.jsonl` (4,800 rows) and the committed
@@ -389,8 +390,10 @@ pipeline at configurable scale, then recomputes the committed outputs and
 figures from the resulting reports database.
 
 ```bash
-./reproduce.sh full --n 20                    # or:  make full N=20
-./reproduce.sh full --n 20 --db /path/to/bl_snap.db   # analyze an existing DB
+./reproduce.sh dataset                        # download + verify + decompress the released DB into data/ (~4 min, needs ~11 GB free)
+./reproduce.sh full                           # analyze the released DB end-to-end and verify all 49 paper values (~30 min)
+./reproduce.sh full --n 20                    # or:  make full N=20  (small-scale rescan path)
+./reproduce.sh full --n 20 --db data/bl_snap.db   # analyze a DB you already have
 ```
 
 Full mode needs a working **Docker** daemon and the separate scanner pipeline
@@ -416,7 +419,7 @@ resources, and expected result for each headline claim of the paper.
 Each subsection reproduces one **Claim** of the paper. Claims 2–4
 read the full reports database `bl_snap.db` (~9.7 GB, **released with the artifact**);
 point the scripts at it with the `BL_DB` environment variable (e.g.
-`/path/to/bl_snap.db`). Outputs are written next to the scripts unless
+`data/bl_snap.db`). Outputs are written next to the scripts unless
 `BL_OUT` is set. The committed `analysis/*.json` / `*.tsv` (and the precomputed
 `analysis/figdata_baseline.json`) are the precomputed results, so the headline
 numbers and every figure can be reproduced even before the database is available.
@@ -457,7 +460,7 @@ Reachability breakdown + the reachability figure (precomputed; no database):
 
 ```bash
 python3 analysis/make_figs.py                       # uses figdata_baseline.json
-BL_DB=/path/to/bl_snap.db python3 analysis/make_figs.py   # full mode (from DB)
+BL_DB=data/bl_snap.db python3 analysis/make_figs.py   # full mode (from DB)
 ```
 
 - **Expected runtime:** seconds for `wc`; seconds for `make_figs.py` in
@@ -492,9 +495,9 @@ python3 analysis/analyze_extra.py
 
 # (b) recompute the committed outputs from scratch (full mode, needs the DB):
 #     the reproduction pass and the precomputed figure arrays
-BL_DB=/path/to/bl_snap.db BL_OUT=analysis python3 analysis/repro_baseline.py
-BL_DB=/path/to/bl_snap.db BL_OUT=analysis python3 analysis/precompute_figdata.py
-BL_DB=/path/to/bl_snap.db python3 analysis/make_figs.py
+BL_DB=data/bl_snap.db BL_OUT=analysis python3 analysis/repro_baseline.py
+BL_DB=data/bl_snap.db BL_OUT=analysis python3 analysis/precompute_figdata.py
+BL_DB=data/bl_snap.db python3 analysis/make_figs.py
 ```
 
 - **Expected runtime:** seconds in precomputed mode; ~3–4 minutes each in full
@@ -538,8 +541,8 @@ Rebuild the seeded sample and verdicts from the database (optional, deterministi
 via `SEED=20260522`):
 
 ```bash
-BL_DB=/path/to/bl_snap.db BL_OUT=analysis python3 analysis/secret_sample_baseline.py
-BL_DB=/path/to/bl_snap.db BL_OUT=analysis python3 analysis/validate_secrets_baseline.py
+BL_DB=data/bl_snap.db BL_OUT=analysis python3 analysis/secret_sample_baseline.py
+BL_DB=data/bl_snap.db BL_OUT=analysis python3 analysis/validate_secrets_baseline.py
 ```
 
 The committed `analysis/secret_validation_baseline.json` and
@@ -585,7 +588,7 @@ print('official=%d community=%d community_high_or_critical=%.1f%%' % (o['n_offic
 Reproduce from the database:
 
 ```bash
-BL_DB=/path/to/bl_snap.db BL_OUT=analysis python3 analysis/repro_baseline.py
+BL_DB=data/bl_snap.db BL_OUT=analysis python3 analysis/repro_baseline.py
 # then re-read liu2020.ours_random.n_official from analysis/repro_baseline.json
 ```
 

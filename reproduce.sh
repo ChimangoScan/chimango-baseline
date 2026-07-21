@@ -14,6 +14,11 @@
 #       Full-scale reproduction (the paper's 4,800-repository draw) needs the
 #       authors' multi-machine setup; see the README "Reproduction" section.
 #
+#   ./reproduce.sh dataset [DIR]
+#       Download the released reports database (bl_snap.db.zst, 226 MB) from
+#       the GitHub release into DIR (default: data/), verify both SHA-256
+#       checksums, and decompress it (needs ~11 GB free in DIR).
+#
 #   ./reproduce.sh verify
 #       Compare every number the paper asserts (expected/paper_values.json)
 #       exactly against the committed analysis outputs. Exit 0 only on 0 FAIL.
@@ -33,7 +38,7 @@ export BL_FIGS="${BL_FIGS:-$HERE/figures}"
 log() { printf '\n=== %s ===\n' "$*"; }
 
 usage() {
-    sed -n "2,34p" "$0" | sed 's/^# \{0,1\}//'
+    sed -n "2,39p" "$0" | sed 's/^# \{0,1\}//'
     exit "${1:-0}"
 }
 
@@ -81,6 +86,34 @@ PY
 verify() {
     log "VERIFY paper values against committed outputs"
     "$PYTHON" analysis/verify_values.py
+}
+
+# --------------------------------------------------------------------------
+DATASET_URL="https://github.com/ChimangoScan/chimango-baseline/releases/download/dataset-v1/bl_snap.db.zst"
+SHA_ZST="8fb43ecd312483d0a1b578c8c7685546a2197bc0d90577e2b7f8d19d77eeb580"
+SHA_DB="70e43470cd877999a236be578e733233b8d3a9a382f220e7804b98ad46c58ab6"
+
+dataset() {
+    local DIR="${1:-data}"
+    mkdir -p "$DIR"
+    local DB="$DIR/bl_snap.db" ZST="$DIR/bl_snap.db.zst"
+    if [ -f "$DB" ] && echo "$SHA_DB  $DB" | sha256sum -c --quiet -; then
+        log "Dataset already present and verified: $DB" >&2
+        echo "$DB"; return 0
+    fi
+    command -v zstd >/dev/null || { echo "zstd is required (apt install zstd)" >&2; exit 1; }
+    local FREE_GB; FREE_GB=$(df -BG --output=avail "$DIR" | tail -1 | tr -dc 0-9)
+    [ "$FREE_GB" -ge 11 ] || { echo "need ~11 GB free in $DIR (have ${FREE_GB} GB)" >&2; exit 1; }
+    if [ ! -f "$ZST" ] || ! echo "$SHA_ZST  $ZST" | sha256sum -c --quiet -; then
+        log "Downloading the reports database (226 MB)" >&2
+        curl -L --fail --retry 3 -o "$ZST" "$DATASET_URL"
+        echo "$SHA_ZST  $ZST" | sha256sum -c - || { echo "checksum mismatch: $ZST" >&2; exit 1; }
+    fi
+    log "Decompressing to $DB (10.3 GB)" >&2
+    zstd -d -f "$ZST" -o "$DB"
+    echo "$SHA_DB  $DB" | sha256sum -c - || { echo "checksum mismatch: $DB" >&2; exit 1; }
+    log "Dataset ready: $DB" >&2
+    echo "$DB"
 }
 
 # --------------------------------------------------------------------------
@@ -144,8 +177,12 @@ EOF
         echo "See the README 'Installation' section for the exact commands." >&2
     fi
 
-    # 3. analyze the resulting database, if available.
+    # 3. analyze the reports database: the one given via --db/BL_DB, or the
+    #    released canonical one (downloaded and checksum-verified on demand).
     DB="${DB:-${BL_DB:-}}"
+    if [ -z "$DB" ]; then
+        DB="$(dataset data | tail -1)"
+    fi
     if [ -n "$DB" ] && [ -f "$DB" ]; then
         log "3/4  Recompute committed outputs from $DB"
         BL_DB="$DB" BL_OUT=analysis "$PYTHON" analysis/repro_baseline.py
@@ -169,6 +206,7 @@ case "${1:-}" in
     precomputed) shift; precomputed "$@" ;;
     full)        shift; full "$@" ;;
     verify)      shift; verify "$@" ;;
+    dataset)     shift; dataset "$@" ;;
     -h|--help|help|"") usage 0 ;;
     *) echo "unknown mode: $1" >&2; usage 2 ;;
 esac
