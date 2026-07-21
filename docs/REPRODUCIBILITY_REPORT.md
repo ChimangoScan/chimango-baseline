@@ -40,14 +40,22 @@ z=1.21 (p=0.23); oldest CVE 1999; 0 official repositories.
 
 ## Known limitations and inconsistencies
 
-- **Secret sample snapshot.** The committed 1,100-detection sample
-  (`secret_sample_baseline.jsonl`, seed 20260522) was drawn when the corpus had
-  169,528 secret detections; the released database has 206,096 (the corpus grew
-  before the freeze). Re-running `secret_sample_baseline.py` against
-  `bl_snap.db` therefore draws a *different* 1,100. The committed sample,
-  verdicts (`secret_review_baseline.tsv`) and validation JSON are the ground
-  truth of record; the 5 true positives were verified by hand and their
-  (detector, location) keys are hardcoded in `validate_secrets_baseline.py`.
+- **Secret sample snapshot (verified empirically).** The committed
+  1,100-detection sample (`secret_sample_baseline.jsonl`, seed 20260522) was
+  drawn when the corpus had 169,528 secret detections; the released database
+  has 206,096 (the corpus grew before the freeze). Three measured facts:
+  (1) the draw itself is deterministic: two runs of
+  `secret_sample_baseline.py` against the released `bl_snap.db` produce
+  byte-identical output; (2) that fresh draw differs from the committed sample
+  (899 of its 1,082 unique detection keys coincide by chance), as expected
+  from the larger population; (3) every committed sampled detection is
+  auditable in the released database: all 1,082 unique
+  (image, detector, location, value-sha256) keys of the committed sample match
+  a detection in `bl_snap.db` (0 missing), so each hand verdict can be
+  re-examined against the released data. The committed sample, verdicts
+  (`secret_review_baseline.tsv`) and validation JSON are the ground truth of
+  record; the 5 true positives' (detector, location) keys are hardcoded in
+  `validate_secrets_baseline.py`.
 - **Reachability classifier.** The paper's did-not-finish category is the 57
   jobs with status `failed` (started scanning, no report); never-pulled jobs
   (status `skipped`) are classified by error text. Earlier artifact revisions
