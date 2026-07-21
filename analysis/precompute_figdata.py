@@ -6,7 +6,7 @@ so the paper figures regenerate WITHOUT the multi-gigabyte reports database.
 Why this exists
 ---------------
 The per-image scanner reports live in a large SQLite database (reports table,
-~9.7 GB, released on acceptance). The figure scripts (make_figs.py,
+~9.7 GB, released with the artifact). The figure scripts (make_figs.py,
 analyze_extra.py) need a handful of aggregate arrays from it (a per-image
 vulnerability-count vector, severity totals, scanner-coverage counts, the
 reachability breakdown from the jobs table, a scanner-agreement Venn over
@@ -179,14 +179,17 @@ def main():
                 dockle_cnt[d] += 1
 
     # --- reachability breakdown (Fig B), from the jobs table ---
+    # A job that started scanning but never produced a report (status
+    # 'failed': stuck scanners, save/timeout/disk errors) is did-not-finish;
+    # only never-pulled jobs (status 'skipped') are classified by error text.
     reach = {"scanned": N, "gone": 0, "arch": 0, "auth": 0,
-             "format": 0, "infra": 0}
+             "format": 0, "dnf": 0}
     for (st, e) in con.execute(
             "SELECT status, error FROM jobs "
             "WHERE status IN ('skipped','failed')"):
         el = (e or "").lower()
-        if "no space" in el or "register layer" in el or "write /" in el:
-            reach["infra"] += 1
+        if st == "failed":
+            reach["dnf"] += 1
         elif ("no matching manifest" in el or "platform" in el
               or "no child with platform" in el):
             reach["arch"] += 1

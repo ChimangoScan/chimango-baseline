@@ -14,6 +14,10 @@
 #       Full-scale reproduction (the paper's 4,800-repository draw) needs the
 #       authors' multi-machine setup; see the README "Reproduction" section.
 #
+#   ./reproduce.sh verify
+#       Compare every number the paper asserts (expected/paper_values.json)
+#       exactly against the committed analysis outputs. Exit 0 only on 0 FAIL.
+#
 # Environment overrides:
 #   PYTHON   python interpreter (default: python3)
 #   BL_DB    path to the reports SQLite (full mode; auto-detected if --db given)
@@ -29,7 +33,7 @@ export BL_FIGS="${BL_FIGS:-$HERE/figures}"
 log() { printf '\n=== %s ===\n' "$*"; }
 
 usage() {
-    sed -n '2,30p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n "2,34p" "$0" | sed 's/^# \{0,1\}//'
     exit "${1:-0}"
 }
 
@@ -64,10 +68,19 @@ PY
     "$PYTHON" analysis/make_figs.py
     "$PYTHON" analysis/analyze_extra.py
 
-    log "3/3  Figures written"
+    log "3/4  Figures written"
     ls -1 "$BL_FIGS"/*.pdf
+
+    log "4/4  Verify the paper's numbers against the committed outputs"
+    "$PYTHON" analysis/verify_values.py
     echo
     echo "Precomputed reproduction complete. PDFs are in: $BL_FIGS"
+}
+
+# --------------------------------------------------------------------------
+verify() {
+    log "VERIFY paper values against committed outputs"
+    "$PYTHON" analysis/verify_values.py
 }
 
 # --------------------------------------------------------------------------
@@ -85,7 +98,7 @@ full() {
     cat <<EOF
 This runs the end-to-end pipeline at small scale on this machine. It requires:
   * a working Docker daemon (the six scanners run as Docker images),
-  * the separate scanner pipeline (AnonymousSystem/scanners) installed and on
+  * the separate scanner pipeline (github.com/ChimangoScan/scanners) installed and on
     PATH (or set SCANNERS_DIR to its checkout),
   * outbound access to Docker Hub to pull the sampled images.
 
@@ -127,7 +140,7 @@ at it with --db / BL_DB and re-run this script's analysis step, or run full mode
 again with --db PATH once it exists.
 EOF
     else
-        echo "scanner pipeline not found (set SCANNERS_DIR or install AnonymousSystem/scanners)." >&2
+        echo "scanner pipeline not found (set SCANNERS_DIR or install ChimangoScan/scanners)." >&2
         echo "See the README 'Installation' section for the exact commands." >&2
     fi
 
@@ -137,10 +150,12 @@ EOF
         log "3/4  Recompute committed outputs from $DB"
         BL_DB="$DB" BL_OUT=analysis "$PYTHON" analysis/repro_baseline.py
         BL_DB="$DB" BL_OUT=analysis "$PYTHON" analysis/precompute_figdata.py
-        log "4/4  Regenerate figures from $DB"
+        BL_DB="$DB" BL_OUT=analysis "$PYTHON" analysis/stats_baseline.py
+        log "4/4  Regenerate figures from $DB and verify the paper values"
         BL_DB="$DB" "$PYTHON" analysis/make_figs.py
         BL_DB="$DB" "$PYTHON" analysis/analyze_extra.py
         ls -1 "$BL_FIGS"/*.pdf
+        "$PYTHON" analysis/verify_values.py
     else
         log "3/4  No reports database available yet"
         echo "Once the pipeline has produced a reports SQLite, re-run:"
@@ -153,6 +168,7 @@ EOF
 case "${1:-}" in
     precomputed) shift; precomputed "$@" ;;
     full)        shift; full "$@" ;;
+    verify)      shift; verify "$@" ;;
     -h|--help|help|"") usage 0 ;;
     *) echo "unknown mode: $1" >&2; usage 2 ;;
 esac

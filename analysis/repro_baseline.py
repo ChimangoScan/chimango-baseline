@@ -35,7 +35,7 @@ import time
 from collections import Counter, defaultdict
 
 # Paths are overridable via environment variables so the artifact runs anywhere.
-#   BL_DB      reports SQLite (released on acceptance; ~9.7 GB)
+#   BL_DB      reports SQLite (released with the artifact; ~9.7 GB)
 #   BL_OUT     output directory for repro_baseline.json/.md (default: this dir)
 #   OSV_CACHE  optional osv_severity_cache.json (severity backfill); if absent,
 #              osv unknown severities are simply left as unknown.

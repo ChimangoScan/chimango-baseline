@@ -42,12 +42,12 @@ The raw value is kept ONLY in memory long enough to derive those features.
 Outputs (all under $BL_OUT, default: this script's directory):
   secret_dist_baseline.json    population stats: totals, by-detector, by-location.
   secret_sample_baseline.jsonl  the seeded random sample, one JSON object/line.
-DB path is overridable via $BL_DB (the reports SQLite is released on acceptance).
+DB path is overridable via $BL_DB (the reports SQLite is released with the artifact).
 """
 import os, sqlite3, json, re, random, hashlib, math
 from collections import Counter
 
-# BL_DB / BL_OUT overridable for the artifact (DB released on acceptance).
+# BL_DB / BL_OUT overridable for the artifact (DB released with the artifact).
 DB = os.environ.get("BL_DB", "/path/to/reports.db")
 OUT = os.environ.get("BL_OUT", os.path.dirname(os.path.abspath(__file__)))
 SEED = 20260522

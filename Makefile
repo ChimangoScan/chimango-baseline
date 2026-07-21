@@ -5,6 +5,8 @@
 #                      the shipped data only (no database, no network)
 #   make full          run the six-scanner pipeline at small scale, then analyze
 #                      (needs Docker + the separate scanner pipeline; see README)
+#   make verify        compare every paper number exactly against the committed
+#                      outputs (expected/paper_values.json)
 #   make test          the minimal, self-contained check (no third-party deps)
 #   make clean         remove generated figures
 #
@@ -16,7 +18,7 @@
 PYTHON ?= python3
 N      ?= 20
 
-.PHONY: all install precomputed full test clean
+.PHONY: all install precomputed full verify test clean
 
 all: precomputed
 
@@ -28,6 +30,9 @@ precomputed:
 
 full:
 	./reproduce.sh full --n $(N) $(if $(BL_DB),--db $(BL_DB),)
+
+verify:
+	./reproduce.sh verify
 
 test:
 	$(PYTHON) scripts/minimal_test.py

@@ -57,7 +57,7 @@ Outputs (under $BL_OUT, default: this script's directory):
 import os, sqlite3, json, re, math, csv, random, hashlib
 from collections import Counter
 
-# BL_DB / BL_OUT overridable for the artifact (DB released on acceptance).
+# BL_DB / BL_OUT overridable for the artifact (DB released with the artifact).
 DB = os.environ.get("BL_DB", "/path/to/reports.db")
 OUT = os.environ.get("BL_OUT", os.path.dirname(os.path.abspath(__file__)))
 SEED = 20260522

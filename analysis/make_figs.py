@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import figstyle
 
-# Overridable for the artifact: BL_DB = reports SQLite (released on acceptance),
+# Overridable for the artifact: BL_DB = reports SQLite (released with the artifact),
 # BL_FIGS = output directory for the PDFs (default: ../figures relative here).
 _HERE = os.path.dirname(os.path.abspath(__file__))
 DB = os.environ.get("BL_DB", "/path/to/reports.db")
@@ -63,10 +63,10 @@ def from_db():
                 isec = True
         vpi.append(v); anyv += v > 0; crit += ic; high += ih; secret += isec
     N = n
-    reach = {"scanned": N, "gone": 0, "arch": 0, "auth": 0, "format": 0, "infra": 0}
+    reach = {"scanned": N, "gone": 0, "arch": 0, "auth": 0, "format": 0, "dnf": 0}
     for (st, e) in c.execute("SELECT status, error FROM jobs WHERE status IN ('skipped','failed')"):
         el = (e or "").lower()
-        if "no space" in el or "register layer" in el or "write /" in el: reach["infra"] += 1
+        if st == "failed": reach["dnf"] += 1
         elif "no matching manifest" in el or "platform" in el or "no child with platform" in el: reach["arch"] += 1
         elif any(s in el for s in ("denied", "unauthorized", "forbidden", "authentication required")): reach["auth"] += 1
         elif any(s in el for s in ("not found", "manifest unknown", "does not exist", "name unknown", "no such", "not known", "failed to resolve", "manifest for")): reach["gone"] += 1
@@ -96,7 +96,7 @@ else:
 # === Fig A: per-image overview, three panels ===
 vpi = np.sort(np.array(vpi)); cdf = np.arange(1, len(vpi)+1)/len(vpi)*100
 med = int(np.median(vpi))
-fig, ax = plt.subplots(1, 3, figsize=(6.9, 1.95))
+fig, ax = plt.subplots(1, 3, figsize=(6.9, 1.68))
 ax[0].plot(np.maximum(vpi, 0.5), cdf, color=BLUE); ax[0].set_xscale("log")
 figstyle.grid(ax[0]); ax[0].axvline(med, ls="--", color="#999", lw=0.8)
 ax[0].text(med*1.25, 7, f"median {med}", fontsize=6.3, color="#666")
@@ -112,14 +112,14 @@ cvp = [100*x/N for x in cv]
 b = ax[2].bar(cl, cvp, color=[GREEN, "#fdae61", RED]); figstyle.grid(ax[2])
 for bb, p in zip(b, cvp): ax[2].text(bb.get_x()+bb.get_width()/2, p+1.5, f"{p:.0f}", ha="center", fontsize=6.3)
 ax[2].set_ylabel("% of images"); ax[2].set_xlabel("scanners completed")
-ax[2].set_title("(c) Scanner coverage"); ax[2].set_ylim(0, 100)
+ax[2].set_title("(c) Scanner completion"); ax[2].set_ylim(0, 100)
 fig.tight_layout(w_pad=1.1); save(fig, "fig_panels3")
 
 # === Fig B: reachability of a uniform random draw (unique to this study) ===
 # Outcomes of every drawn repository (infra disk failures re-queued, excluded).
 order = [("Scanned", "scanned", GREEN), ("Gone (404)", "gone", RED),
-         ("Non-image (OCI)", "format", "#8073ac"), ("Private", "auth", "#fdae61"),
-         ("Other arch.", "arch", "#80b1d3")]
+         ("Unpullable", "format", "#8073ac"), ("Private", "auth", "#fdae61"),
+         ("Other arch.", "arch", "#80b1d3"), ("DNF", "dnf", "#999999")]
 tot = sum(reach[k] for _, k, _ in order)
 fig, ax = plt.subplots(figsize=(6.9, 0.95))
 left = 0.0
@@ -134,9 +134,13 @@ ax.set_xlim(0, 100); ax.set_ylim(-0.5, 0.5); ax.axis("off")
 ax.set_title("Outcome of a uniform random draw of the Docker Hub namespace", fontsize=8.5, pad=3)
 save(fig, "fig_reach")
 
-# === Fig C: reproduction of prior analyses on the random sample (3 panels) ===
+# === Fig C: reproduction of prior analyses on the random sample (5 panels, 2 rows) ===
 R = json.load(open(os.path.join(_HERE, "repro_baseline.json"))); FD = R["figure_data"]
-fig, ax = plt.subplots(1, 3, figsize=(6.9, 1.95))
+fig = plt.figure(figsize=(6.9, 3.05))
+gs = fig.add_gridspec(2, 6)
+ax = [fig.add_subplot(gs[0, 0:2]), fig.add_subplot(gs[0, 2:4]),
+      fig.add_subplot(gs[0, 4:6]), fig.add_subplot(gs[1, 0:3]),
+      fig.add_subplot(gs[1, 3:6])]
 yrs = FD["cve_by_year"]["years"]; cnts = FD["cve_by_year"]["counts"]
 ax[0].bar(yrs, cnts, color=BLUE, width=0.9); figstyle.grid(ax[0])
 ax[0].set_xlabel("CVE identifier year"); ax[0].set_ylabel("Distinct CVEs")
@@ -144,13 +148,29 @@ ax[0].set_title("(a) CVEs by year"); ax[0].set_xticks([1999, 2012, 2026]); ax[0]
 ep = FD["ecosystem_split"]["ours_pct"]
 b = ax[1].bar(["OS", "Lang.", "Other"], ep, color=[BLUE, "#f46d43", "#cccccc"]); figstyle.grid(ax[1])
 for bb, p in zip(b, ep): ax[1].text(bb.get_x()+bb.get_width()/2, p+1.5, f"{p:.0f}", ha="center", fontsize=6.3)
-ax[1].set_ylabel("% of severe findings"); ax[1].set_title("(b) Severe by ecosystem"); ax[1].set_ylim(0, 100)
+ax[1].set_ylabel("% of severe findings"); ax[1].set_title("(b) Severe findings by ecosystem"); ax[1].set_ylim(0, 100)
 top = R["shu2017"]["ours_random"]["top10_packages"][:6][::-1]
 ax[2].barh([p["package"] for p in top], [p["pct_corpus"] for p in top], color=GREEN)
 figstyle.grid(ax[2], "x")
 ax[2].set_xlabel("% of images"); ax[2].set_title("(c) Top vulnerable packages"); ax[2].set_xlim(0, 100)
 ax[2].tick_params(axis="y", labelsize=6.5)
-fig.tight_layout(w_pad=1.1); save(fig, "fig_repro")
+studies = ["Shu et al. 2017", "Liu et al. 2020", "Dr. Docker 2025"]
+reported = [80, 64, 93.7]; highexp = [93.4, 95.6, 96.3]; rnd = [94.4, 96.6, 96.8]
+yy = np.arange(len(studies)); hh = 0.26
+ax[3].barh(yy+hh, reported, hh, color="#bbbbbb", label="reported")
+ax[3].barh(yy, highexp, hh, color="#f46d43", label="high-exposure")
+ax[3].barh(yy-hh, rnd, hh, color=BLUE, label="random (ours)")
+ax[3].set_yticks(yy); ax[3].set_yticklabels(studies, fontsize=6.5)
+ax[3].set_xlim(0, 100); ax[3].set_xlabel("% of images with vulnerability")
+ax[3].set_title("(d) Prevalence vs. prior reports"); figstyle.grid(ax[3], "x")
+ax[3].legend(fontsize=5.8, loc="lower left", framealpha=0.9)
+labs2 = ["Shu et al.\n2017", "Zerouali et al.\n2019", "High-exposure\n2026", "Random\n2026"]
+med2 = [158, 601, 885, 947]
+b2 = ax[4].bar(labs2, med2, color=["#bbbbbb", "#bbbbbb", "#f46d43", BLUE]); figstyle.grid(ax[4])
+for bb, m in zip(b2, med2): ax[4].text(bb.get_x()+bb.get_width()/2, m+18, str(m), ha="center", fontsize=6.3)
+ax[4].set_ylabel("Median vulns/image"); ax[4].set_title("(e) Median vulnerabilities per image over a decade")
+ax[4].set_ylim(0, 1080); ax[4].tick_params(axis="x", labelsize=6.0)
+fig.tight_layout(w_pad=1.0, h_pad=1.4); save(fig, "fig_repro")
 
 print(f"N={N} anyvuln={anyv_pct:.1f}% crit={crit_pct:.1f}% high={high_pct:.1f}% "
       f"secret={secret_pct:.1f}% median={med}")

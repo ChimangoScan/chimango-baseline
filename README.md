@@ -45,11 +45,15 @@ the random sample and reproduces the paper's claims.
 Repository contents:
 
 ```
-anonymoussystem-baseline/
+chimango-baseline/
 ├── README.md                       this file (artifact guide)
 ├── LICENSE                         MIT
-├── Makefile                        reproduction entry points (precomputed / full)
-├── reproduce.sh                    reproduction driver (precomputed / full)
+├── Makefile                        reproduction entry points (precomputed / full / verify)
+├── reproduce.sh                    reproduction driver (precomputed / full / verify)
+├── expected/
+│   └── paper_values.json           every number the paper asserts, with source locator
+├── docs/
+│   └── REPRODUCIBILITY_REPORT.md   corrections, known limitations, verification verdict
 ├── requirements.txt                Python deps for the analysis scripts
 ├── scripts/
 │   └── sample_repos.py             uniform random draw from the crawl (-> data/random_sample.jsonl)
@@ -64,6 +68,9 @@ anonymoussystem-baseline/
     ├── figdata_baseline.json       precomputed figure arrays (figures regenerate with no database)
     ├── make_figs.py                paper figures (per-image overview, reachability, reproduction)
     ├── analyze_extra.py            extra analyses + the scanner-agreement / OS / secret-FP figure
+    ├── stats_baseline.py           z-tests vs the high-exposure corpus, Jaccard, distinct-CVE dedup
+    ├── stats_baseline.json         numeric output of stats_baseline.py
+    ├── verify_values.py            exact check of every paper number (reproduce.sh verify)
     ├── figstyle.py                 shared matplotlib style
     ├── secret_sample_baseline.py   draw the seeded n=1,100 secret sample (redacted)
     ├── secret_sample_baseline.jsonl seeded secret sample (redacted values + sha256)
@@ -80,7 +87,7 @@ anonymoussystem-baseline/
 We apply for all four SBSeg/SF artifact badges:
 
 - **Available.** This repository is public under an open (MIT)
-  license, with a permanent record to be assigned a DOI on acceptance. The
+  license. The
   canonical random draw (`data/random_sample.jsonl`) and the hand-labeled
   secret-validation sample (`analysis/secret_review_baseline.tsv`) are included
   directly.
@@ -103,8 +110,10 @@ We apply for all four SBSeg/SF artifact badges:
   record so it does not depend on a server-side `$sample` re-execution.
 
 > **Note on the full corpus.** The per-image scanner reports are stored in a
-> SQLite database (`bl_snap.db`, ~9.7 GB) that backs Claims 2–4. It is **too
-> large to commit and is released on acceptance** (and on request to reviewers).
+> SQLite database (`bl_snap.db`, 10.3 GB; 226 MB compressed) that backs Claims 2–4.
+> It is too large to commit and is published as a **GitHub release asset**
+> (`bl_snap.db.zst`, zstd-compressed): download it from this repository's
+> Releases page and decompress with `zstd -d bl_snap.db.zst` (needs ~11 GB free).
 > Claim 1 and the Minimal test run without it; Claims 2–4 document the exact
 > commands to run once the database is available, and the precomputed numeric
 > outputs (`analysis/repro_baseline.json`, `analysis/secret_validation_baseline.json`,
@@ -127,14 +136,14 @@ This artifact has two parts with different requirements:
 2. **Scanning (separate pipeline).** Producing the reports database from scratch
    requires Docker and pulls thousands of container images; it is bandwidth- and
    disk-bound and was run across several machines. This is *not* required to
-   reproduce the analyses (the database is released on acceptance), but the
+   reproduce the analyses (the database is released with the artifact), but the
    commands are given in full under [Installation](#installation) and
    [Claim 1](#claim-1--uniform-random-draw-and-reachability) for completeness.
 
 **Execution environment used for the paper.**
 
 - Analysis: Python 3.12 on Linux (Ubuntu), x86-64.
-- Scanning: the `AnonymousSystem/scanners` pipeline on a small cluster of Linux
+- Scanning: the `ChimangoScan/scanners` pipeline on a small cluster of Linux
   hosts, each with Docker and the six scanner images; targets pinned to
   `linux/amd64`, images removed after scanning, per-image size capped.
 
@@ -170,7 +179,7 @@ own crawl; the canonical draw is already shipped as `data/random_sample.jsonl`,
 so the analysis and reproduction scripts run without it.
 
 **Scanners (the six-tool battery).** Run as pinned Docker images by the
-`AnonymousSystem/scanners` pipeline. The exact registry (image + invocation per
+`ChimangoScan/scanners` pipeline. The exact registry (image + invocation per
 scanner) is in that repository under `config/scanners.yaml`; the six static
 scanners used for this study are:
 
@@ -190,7 +199,7 @@ tool. Vulnerability databases (Trivy, Grype, OSV) are fetched at scan time.
 
 **Docker.** Required only for the scanning step (not for the analyses). Any
 recent Docker Engine on `linux/amd64`. The pipeline also expects Docker Hub
-pull access (optionally authenticated to lift the anonymous pull rate limit).
+pull access (optionally authenticated to lift the unauthenticated pull rate limit).
 
 ---
 
@@ -216,7 +225,7 @@ third-party container images on Docker Hub.** Please treat it accordingly:
   persist it.
 - **The full reports database is gated.** `bl_snap.db` (which can contain
   unredacted matched values inside raw scanner output) is not committed and is
-  released on acceptance; the redaction above is what makes the *committed*
+  released with the artifact; the redaction above is what makes the *committed*
   sample safe to publish.
 - **Running the scanners** pulls and unpacks arbitrary third-party images. Do
   this only on disposable infrastructure. The pipeline runs scanners against a
@@ -234,8 +243,8 @@ public images and reports aggregate, redacted findings.
 Clone and install the Python dependencies for the analyses:
 
 ```bash
-git clone <ANONYMIZED-REPOSITORY-URL> anonymoussystem-baseline
-cd anonymoussystem-baseline
+git clone https://github.com/ChimangoScan/chimango-baseline chimango-baseline
+cd chimango-baseline
 python3 -m pip install -r requirements.txt   # matplotlib, numpy (+ pymongo to re-draw)
 ```
 
@@ -243,12 +252,12 @@ That is everything needed for the [Minimal test](#minimal-test), Claim 1, and to
 inspect the precomputed outputs of Claims 2–4.
 
 **To re-run the scan (optional; produces the reports SQLite).** The six-scanner
-pipeline is a separate, reusable project — **`AnonymousSystem/scanners`** — and
+pipeline is a separate, reusable project — **`ChimangoScan/scanners`** — and
 is *not* duplicated here. Install and point it at this repository's sample:
 
 ```bash
 # 1. get the pipeline (Python >= 3.10, uv, and a working Docker daemon)
-git clone <ANONYMIZED-SCANNERS-REPOSITORY-URL> scanners
+git clone https://github.com/ChimangoScan/scanners scanners
 cd scanners && uv sync
 
 # 2. configure: copy the example config and point source.path at our sample,
@@ -261,7 +270,7 @@ Then set, in `scanners`' `config/config.yaml`:
 ```yaml
 source:
   type: jsonl
-  path: /path/to/anonymoussystem-baseline/data/random_sample.jsonl
+  path: /path/to/chimango-baseline/data/random_sample.jsonl
 scanners:
   only: [syft, trivy, grype, osv, dockle, trufflehog]   # the six-tool battery
   static: true
@@ -385,7 +394,7 @@ figures from the resulting reports database.
 ```
 
 Full mode needs a working **Docker** daemon and the separate scanner pipeline
-(`AnonymousSystem/scanners`; see [Installation](#installation)); set
+(`ChimangoScan/scanners`; see [Installation](#installation)); set
 `SCANNERS_DIR` to its checkout, and `MONGO_URI` to draw a fresh sample from a
 crawl (otherwise the first `N` rows of the shipped canonical draw are used so
 the pipeline can still be exercised). The default `N` is small so it runs on a
@@ -405,7 +414,7 @@ resources, and expected result for each headline claim of the paper.
 ## Experiments
 
 Each subsection reproduces one **Claim** of the paper. Claims 2–4
-read the full reports database `bl_snap.db` (~9.7 GB, **released on acceptance**);
+read the full reports database `bl_snap.db` (~9.7 GB, **released with the artifact**);
 point the scripts at it with the `BL_DB` environment variable (e.g.
 `/path/to/bl_snap.db`). Outputs are written next to the scripts unless
 `BL_OUT` is set. The committed `analysis/*.json` / `*.tsv` (and the precomputed
@@ -597,7 +606,7 @@ See [Repository contents](#readme-structure) above for the file tree. In short:
 `scripts/` draws the sample; `data/` holds the canonical draw; `analysis/` holds
 the reproduction and figure scripts plus their committed outputs and the
 hand-labeled secret sample. The six-scanner pipeline that produces the reports
-database is the separate `AnonymousSystem/scanners` project (see
+database is the separate `ChimangoScan/scanners` project (see
 [Installation](#installation)).
 
 ---
@@ -605,7 +614,6 @@ database is the separate `AnonymousSystem/scanners` project (see
 ## LICENSE
 
 This artifact is released under the [MIT License](LICENSE) (see the `LICENSE`
-file). Copyright is held anonymously for this double-blind submission and will be
-attributed on acceptance. Scanned third-party images and their contents remain
+file). Scanned third-party images and their contents remain
 the property of their respective owners; only redacted, aggregate findings are
 included here.

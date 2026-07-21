@@ -1,0 +1,44 @@
+{
+ "N": 2879,
+ "total_findings": 9888892,
+ "ztests": {
+  "critical": {
+   "x1": 2718,
+   "x2": 49392,
+   "z": 2.17,
+   "p": 0.03,
+   "p1": 94.4,
+   "p2": 93.4
+  },
+  "high": {
+   "x1": 2767,
+   "x2": 50534,
+   "z": 1.46,
+   "p": 0.15,
+   "p1": 96.1,
+   "p2": 95.5
+  },
+  "any": {
+   "x1": 2786,
+   "x2": 50957,
+   "z": 1.21,
+   "p": 0.23,
+   "p1": 96.8,
+   "p2": 96.3
+  }
+ },
+ "jaccard_image_cve": {
+  "grype-trivy": 0.23,
+  "grype-osv": 0.43,
+  "osv-trivy": 0.18
+ },
+ "jaccard_best_pair": [
+  "grype-osv",
+  0.43
+ ],
+ "unique_cves_per_image": {
+  "median": 260,
+  "mean": 856.8,
+  "max": 8265
+ }
+}
