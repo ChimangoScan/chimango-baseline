@@ -6,7 +6,7 @@ so the paper figures regenerate WITHOUT the multi-gigabyte reports database.
 Why this exists
 ---------------
 The per-image scanner reports live in a large SQLite database (reports table,
-~9.7 GB, released with the artifact). The figure scripts (make_figs.py,
+10.3 GB, published as a GitHub release asset). The figure scripts (make_figs.py,
 analyze_extra.py) need a handful of aggregate arrays from it (a per-image
 vulnerability-count vector, severity totals, scanner-coverage counts, the
 reachability breakdown from the jobs table, a scanner-agreement Venn over

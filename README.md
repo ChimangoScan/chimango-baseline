@@ -1,7 +1,8 @@
-# How Secure Is the Typical Docker Hub Image? A Uniform Random-Sample Measurement
+# A Uniform Random-Sample Security Measurement of Docker Hub Images
 
-Artifacts for the SBSeg/SF'26 submission *"How Secure Is the Typical Docker Hub
-Image? A Uniform Random-Sample Measurement."*
+Artifacts for the SBSeg 2026 paper *"A Uniform Random-Sample Security
+Measurement of Docker Hub Images"* (Cristhian Kapelinski and Diego Kreutz,
+AI Horizon Labs, UNIPAMPA).
 
 **Abstract.** Prior large-scale Docker Hub security measurements sample popular,
 official, or otherwise curated images, which leaves open how secure the *typical*
@@ -19,7 +20,7 @@ draw, the analysis and reproduction scripts, the hand-labeled secret-validation
 sample, and instructions for re-running the scan.
 
 This is the *control group* (uniform random sample) companion to a separate
-high-exposure measurement study. The scanning pipeline itself is a separate,
+highest-exposure measurement study (ChimangoScan). The scanning pipeline itself is a separate,
 reusable project (see [Installation](#installation)); this repository wires it to
 the random sample and reproduces the paper's claims.
 
@@ -112,8 +113,9 @@ We apply for all four SBSeg/SF artifact badges:
 > **Note on the full corpus.** The per-image scanner reports are stored in a
 > SQLite database (`bl_snap.db`, 10.3 GB; 226 MB compressed) that backs Claims 2–4.
 > It is too large to commit and is published as a **GitHub release asset**
-> (`bl_snap.db.zst`, zstd-compressed): download it from this repository's
-> Releases page and decompress with `zstd -d bl_snap.db.zst` (needs ~11 GB free).
+> (`bl_snap.db.zst`, zstd-compressed). `./reproduce.sh dataset` downloads it,
+> verifies both SHA-256 checksums, and decompresses it (needs `zstd` installed
+> and ~11 GB free in `data/`).
 > Claim 1 and the Minimal test run without it; Claims 2–4 document the exact
 > commands to run once the database is available, and the precomputed numeric
 > outputs (`analysis/repro_baseline.json`, `analysis/secret_validation_baseline.json`,
@@ -128,7 +130,7 @@ This artifact has two parts with different requirements:
 
 1. **Analysis / reproduction (this repository).** Pure Python. Runs on any
    Linux/macOS machine with Python 3.10+ and a few GB of RAM. The streaming
-   analyses over the full reports database (Claims 2–4) read a ~9.7 GB SQLite
+   analyses over the full reports database (Claims 2–4) read a 10.3 GB SQLite
    file once and need roughly 2–4 GB of RAM and ~10 GB of free disk for that
    file. The included [Minimal test](#minimal-test) and Claim 1 need neither the
    database nor any network access.
@@ -177,6 +179,10 @@ python3 -m pip install -r requirements.txt
 `pymongo` is only needed if you want to re-draw the random sample against your
 own crawl; the canonical draw is already shipped as `data/random_sample.jsonl`,
 so the analysis and reproduction scripts run without it.
+
+**System tools.** `curl` and `zstd` (for `./reproduce.sh dataset`, which
+downloads and decompresses the released reports database; on Debian/Ubuntu:
+`apt install curl zstd`).
 
 **Scanners (the six-tool battery).** Run as pinned Docker images by the
 `ChimangoScan/scanners` pipeline. The exact registry (image + invocation per
@@ -401,7 +407,7 @@ Full mode needs a working **Docker** daemon and the separate scanner pipeline
 `SCANNERS_DIR` to its checkout, and `MONGO_URI` to draw a fresh sample from a
 crawl (otherwise the first `N` rows of the shipped canonical draw are used so
 the pipeline can still be exercised). The default `N` is small so it runs on a
-laptop. **Full-scale reproduction** (the paper's 4,800-repository draw, ~9.7 GB
+laptop. **Full-scale reproduction** (the paper's 4,800-repository draw, 10.3 GB
 of reports across the six tools) is bandwidth- and disk-bound and was run across
 several machines — that scale needs the authors' multi-machine setup, but the
 exact commands and the baseline-specific scanner configuration are documented in
@@ -417,7 +423,7 @@ resources, and expected result for each headline claim of the paper.
 ## Experiments
 
 Each subsection reproduces one **Claim** of the paper. Claims 2–4
-read the full reports database `bl_snap.db` (~9.7 GB, **released with the artifact**);
+read the full reports database `bl_snap.db` (10.3 GB, fetched by `./reproduce.sh dataset`);
 point the scripts at it with the `BL_DB` environment variable (e.g.
 `data/bl_snap.db`). Outputs are written next to the scripts unless
 `BL_OUT` is set. The committed `analysis/*.json` / `*.tsv` (and the precomputed
@@ -467,7 +473,7 @@ BL_DB=data/bl_snap.db python3 analysis/make_figs.py   # full mode (from DB)
   precomputed mode (~3–4 minutes in full mode: one streaming pass over the
   reports plus the `jobs` table).
 - **Expected resources:** precomputed mode needs only Python + matplotlib; full
-  mode needs ~2–4 GB RAM and the ~9.7 GB database on local disk.
+  mode needs ~2–4 GB RAM and the 10.3 GB database on local disk.
 - **Expected result.** `data/random_sample.jsonl` has 4,800 rows. `make_figs.py`
   prints the per-image summary line (`N=2879 ...`) and a `reach:` line; it writes
   `figures/fig_reach.pdf`, whose bands are **Scanned ≈ 60%** and **Gone (404)
@@ -504,7 +510,7 @@ BL_DB=data/bl_snap.db python3 analysis/make_figs.py
   mode (one streaming pass over ~2,879 reports; `repro_baseline.py` took ~130 s
   for the paper).
 - **Expected resources:** precomputed mode needs only Python + matplotlib; full
-  mode needs ~2–4 GB RAM and the ~9.7 GB database on local disk.
+  mode needs ~2–4 GB RAM and the 10.3 GB database on local disk.
 - **Expected result.** `make_figs.py` prints, e.g.,
   `N=2879 anyvuln=96.8% crit=94.4% high=96.1% secret=82.4% median=947`. In
   `analysis/repro_baseline.json`: `drdocker2025.ours_random.pct_with_known_vuln`
@@ -554,7 +560,7 @@ sample and re-attaches those verdicts to reproduce the methodology.
 - **Expected runtime:** instant for the committed-file checks; ~3–5 minutes each
   for the two rebuild scripts (one streaming pass each over the full secret
   detection population, of order 1.7–2 × 10^5 detections).
-- **Expected resources:** ~2–4 GB RAM; the ~9.7 GB database on local disk for the
+- **Expected resources:** ~2–4 GB RAM; the 10.3 GB database on local disk for the
   rebuild only.
 - **Expected result.** The raw detector hit rate is **82.4%** of scanned images
   (`analysis/repro_baseline.json` →
