@@ -158,13 +158,13 @@ studies = ["Shu et al. 2017", "Liu et al. 2020", "Dr. Docker 2025"]
 reported = [80, 64, 93.7]; highexp = [93.4, 95.6, 96.3]; rnd = [94.4, 96.6, 96.8]
 yy = np.arange(len(studies)); hh = 0.26
 ax[3].barh(yy+hh, reported, hh, color="#bbbbbb", label="reported")
-ax[3].barh(yy, highexp, hh, color="#f46d43", label="high-exposure")
+ax[3].barh(yy, highexp, hh, color="#f46d43", label="highest-exposure")
 ax[3].barh(yy-hh, rnd, hh, color=BLUE, label="random (ours)")
 ax[3].set_yticks(yy); ax[3].set_yticklabels(studies, fontsize=6.5)
 ax[3].set_xlim(0, 100); ax[3].set_xlabel("% of images with vulnerability")
 ax[3].set_title("(d) Prevalence vs. prior reports"); figstyle.grid(ax[3], "x")
 ax[3].legend(fontsize=5.8, loc="lower left", framealpha=0.9)
-labs2 = ["Shu et al.\n2017", "Zerouali et al.\n2019", "High-exposure\n2026", "Random\n2026"]
+labs2 = ["Shu et al.\n2017", "Zerouali et al.\n2019", "Highest-exp.\n2026", "Random\n2026"]
 med2 = [158, 601, 885, 947]
 b2 = ax[4].bar(labs2, med2, color=["#bbbbbb", "#bbbbbb", "#f46d43", BLUE]); figstyle.grid(ax[4])
 for bb, m in zip(b2, med2): ax[4].text(bb.get_x()+bb.get_width()/2, m+18, str(m), ha="center", fontsize=6.3)
