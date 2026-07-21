@@ -96,7 +96,7 @@ else:
 # === Fig A: per-image overview, three panels ===
 vpi = np.sort(np.array(vpi)); cdf = np.arange(1, len(vpi)+1)/len(vpi)*100
 med = int(np.median(vpi))
-fig, ax = plt.subplots(1, 3, figsize=(6.9, 1.68))
+fig, ax = plt.subplots(1, 3, figsize=(6.9, 1.60))
 ax[0].plot(np.maximum(vpi, 0.5), cdf, color=BLUE); ax[0].set_xscale("log")
 figstyle.grid(ax[0]); ax[0].axvline(med, ls="--", color="#999", lw=0.8)
 ax[0].text(med*1.25, 7, f"median {med}", fontsize=6.3, color="#666")
@@ -136,7 +136,7 @@ save(fig, "fig_reach")
 
 # === Fig C: reproduction of prior analyses on the random sample (5 panels, 2 rows) ===
 R = json.load(open(os.path.join(_HERE, "repro_baseline.json"))); FD = R["figure_data"]
-fig = plt.figure(figsize=(6.9, 3.05))
+fig = plt.figure(figsize=(6.9, 2.85))
 gs = fig.add_gridspec(2, 6)
 ax = [fig.add_subplot(gs[0, 0:2]), fig.add_subplot(gs[0, 2:4]),
       fig.add_subplot(gs[0, 4:6]), fig.add_subplot(gs[1, 0:3]),
