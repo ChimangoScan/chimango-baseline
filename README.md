@@ -396,8 +396,8 @@ pipeline at configurable scale, then recomputes the committed outputs and
 figures from the resulting reports database.
 
 ```bash
-./reproduce.sh dataset                        # download + verify + decompress the released DB into data/ (~4 min, needs ~11 GB free)
-./reproduce.sh full                           # analyze the released DB end-to-end and verify all 49 paper values (~30 min)
+./reproduce.sh dataset                        # download + verify + decompress the released DB into data/ (~40 s measured; bandwidth-dependent; needs ~11 GB free)
+./reproduce.sh full                           # analyze the released DB end-to-end and verify all 49 paper values (~6 min measured)
 ./reproduce.sh full --n 20                    # or:  make full N=20  (small-scale rescan path)
 ./reproduce.sh full --n 20 --db data/bl_snap.db   # analyze a DB you already have
 ```
