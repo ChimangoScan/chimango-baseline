@@ -297,7 +297,7 @@ for name, c in by_cat:
 # =====================================================================
 # ============================  FIGURE  ===============================
 # =====================================================================
-fig, ax = plt.subplots(1, 3, figsize=(6.9, 1.9))
+fig, ax = plt.subplots(1, 3, figsize=(6.9, 1.15))
 
 # --- panel (a): scanner divergence (per-image,CVE pooled) ---
 labs = ["1 scanner", "2 scanners", "3 scanners"]
