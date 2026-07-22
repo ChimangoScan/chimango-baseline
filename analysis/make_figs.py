@@ -136,8 +136,8 @@ save(fig, "fig_reach")
 
 # === Fig C: reproduction of prior analyses on the random sample (5 panels, 2 rows) ===
 R = json.load(open(os.path.join(_HERE, "repro_baseline.json"))); FD = R["figure_data"]
-fig = plt.figure(figsize=(6.9, 2.5))
-gs = fig.add_gridspec(2, 6, height_ratios=[1, 1.25])
+fig = plt.figure(figsize=(6.9, 2.85))
+gs = fig.add_gridspec(2, 6, height_ratios=[1, 1.3], hspace=0.9, wspace=1.5)
 ax = [fig.add_subplot(gs[0, 0:2]), fig.add_subplot(gs[0, 2:4]),
       fig.add_subplot(gs[0, 4:6]), fig.add_subplot(gs[1, 0:3]),
       fig.add_subplot(gs[1, 3:6])]
@@ -147,14 +147,14 @@ ax[0].set_xlabel("CVE identifier year"); ax[0].set_ylabel("CVEs")
 ax[0].set_title("(a) CVEs by year"); ax[0].set_xticks([1999, 2012, 2026]); ax[0].set_xlim(1997.5, 2027.5)
 ep = FD["ecosystem_split"]["ours_pct"]
 b = ax[1].bar(["OS", "Lang.", "Other"], ep, color=[BLUE, "#f46d43", "#cccccc"]); figstyle.grid(ax[1])
-for bb, p in zip(b, ep): ax[1].text(bb.get_x()+bb.get_width()/2, p+1.5, f"{p:.0f}", ha="center", fontsize=6.3)
-ax[1].set_ylabel("% of findings"); ax[1].set_title("(b) Severe findings by ecosystem"); ax[1].set_ylim(0, 100)
-labs2 = ["Shu\n2017", "Zerouali\n2019", "Highest-exp.\n2026", "Random\n2026"]
+for bb, p in zip(b, ep): ax[1].text(bb.get_x()+bb.get_width()/2, p+2, f"{p:.0f}", ha="center", fontsize=6.3)
+ax[1].set_ylabel("% of findings"); ax[1].set_title("(b) Severe by ecosystem"); ax[1].set_ylim(0, 112)
+labs2 = ["Shu\n2017", "Zer.\n2019", "High.\n2026", "Rand.\n2026"]
 med2 = [158, 601, 885, 947]
 b2 = ax[2].bar(labs2, med2, color=["#bbbbbb", "#bbbbbb", "#f46d43", BLUE]); figstyle.grid(ax[2])
-for bb, m in zip(b2, med2): ax[2].text(bb.get_x()+bb.get_width()/2, m+25, str(m), ha="center", fontsize=6.0)
-ax[2].set_ylabel("Median"); ax[2].set_title("(c) Median vulns/image over time")
-ax[2].set_ylim(0, 1120); ax[2].tick_params(axis="x", labelsize=5.2)
+for bb, m in zip(b2, med2): ax[2].text(bb.get_x()+bb.get_width()/2, m+30, str(m), ha="center", fontsize=6.0)
+ax[2].set_ylabel("Median"); ax[2].set_title("(c) Median vulns/image")
+ax[2].set_ylim(0, 1150); ax[2].tick_params(axis="x", labelsize=6.0)
 studies = ["Shu et al. 2017", "Liu et al. 2020", "Dr. Docker 2025"]
 reported = [80, 64, 93.7]; highexp = [93.4, 95.6, 96.3]; rnd = [94.4, 96.6, 96.8]
 yy = np.arange(len(studies)); hh = 0.26
@@ -162,15 +162,15 @@ ax[3].barh(yy+hh, reported, hh, color="#bbbbbb", label="reported")
 ax[3].barh(yy, highexp, hh, color="#f46d43", label="highest-exposure")
 ax[3].barh(yy-hh, rnd, hh, color=BLUE, label="random (ours)")
 ax[3].set_yticks(yy); ax[3].set_yticklabels(studies, fontsize=6.5)
-ax[3].set_xlim(0, 100); ax[3].set_xlabel("% of images")
+ax[3].set_xlim(0, 100)
 ax[3].set_title("(d) Prevalence vs. prior reports"); figstyle.grid(ax[3], "x")
-ax[3].legend(fontsize=6.0, ncol=3, loc="upper center", bbox_to_anchor=(0.5, -0.62), frameon=False)
+ax[3].legend(fontsize=6.2, ncol=3, loc="upper center", bbox_to_anchor=(0.5, -0.22), frameon=False, columnspacing=1.2, handlelength=1.3)
 top = R["shu2017"]["ours_random"]["top10_packages"][:6][::-1]
 ax[4].barh([p["package"] for p in top], [p["pct_corpus"] for p in top], color=GREEN)
 figstyle.grid(ax[4], "x")
 ax[4].set_xlabel("% of images"); ax[4].set_title("(e) Top vulnerable packages"); ax[4].set_xlim(0, 100)
 ax[4].tick_params(axis="y", labelsize=6.5)
-fig.tight_layout(w_pad=1.0, h_pad=1.2); save(fig, "fig_repro")
+save(fig, "fig_repro")
 
 print(f"N={N} anyvuln={anyv_pct:.1f}% crit={crit_pct:.1f}% high={high_pct:.1f}% "
       f"secret={secret_pct:.1f}% median={med}")
