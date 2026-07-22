@@ -1,53 +1,200 @@
 {
   "_note": "Every number the camera-ready paper asserts, with its source locator. verify_values.py recomputes each from the committed artifacts (or the reports database when present) and compares exactly.",
-  "n_drawn": {"value": 4800, "source": "Sec. 3 Sampling / Sec. 4.1"},
-  "n_scanned": {"value": 2879, "source": "Sec. 3 Sampling / Table 2"},
-  "pct_scanned": {"value": 60.0, "source": "Sec. 4.1 Reachability"},
-  "pct_gone": {"value": 34.9, "source": "Abstract / Sec. 4.1"},
-  "pct_unpullable": {"value": 2.4, "source": "Sec. 4.1"},
-  "n_unpullable": {"value": 113, "source": "Sec. 4.1"},
-  "pct_private": {"value": 0.9, "source": "Sec. 4.1"},
-  "pct_other_arch": {"value": 0.8, "source": "Sec. 4.1"},
-  "pct_dnf": {"value": 1.2, "source": "Sec. 4.1"},
-  "pct_crit": {"value": 94.4, "source": "Abstract / Table 2"},
-  "pct_high": {"value": 96.1, "source": "Sec. 4.1 / Table 2"},
-  "pct_any": {"value": 96.8, "source": "Sec. 4.1 / Table 3"},
-  "pct_secret_raw": {"value": 82.4, "source": "Abstract / Table 2 / Table 3"},
-  "median_merged": {"value": 947, "source": "Sec. 4.1 / Table 3"},
-  "mean_merged": {"value": 2939, "source": "Sec. 4.1"},
-  "max_merged": {"value": 26511, "source": "Sec. 4.1"},
-  "median_distinct_cves": {"value": 260, "source": "Sec. 4.1"},
-  "mean_distinct_cves": {"value": 856.8, "source": "Sec. 4.1 (857 rounded)"},
-  "max_distinct_cves": {"value": 8265, "source": "Sec. 4.1"},
-  "total_findings_millions": {"value": 9.9, "source": "Sec. 4.1"},
-  "pct_six_scanners": {"value": 62.7, "source": "Sec. 4.1 panel (c)"},
-  "pct_five_plus_scanners": {"value": 96.1, "source": "Sec. 4.1 panel (c)"},
-  "z_crit": {"value": 2.17, "source": "Sec. 4.2"},
-  "p_crit": {"value": 0.03, "source": "Sec. 4.2"},
-  "z_high": {"value": 1.46, "source": "Sec. 4.2"},
-  "p_high": {"value": 0.15, "source": "Sec. 4.2"},
-  "z_any": {"value": 1.21, "source": "Sec. 4.2"},
-  "p_any": {"value": 0.23, "source": "Sec. 4.2"},
-  "worst_severity_modal": {"value": "critical", "source": "Table 3"},
-  "n_official": {"value": 0, "source": "Sec. 4.3 / Table 3"},
-  "pct_eco_os": {"value": 83.4, "source": "Sec. 4.3 / Fig 2(b)"},
-  "pct_eco_lang": {"value": 15.7, "source": "Sec. 4.3 / Fig 2(b)"},
-  "oldest_cve_year": {"value": 1999, "source": "Sec. 4.3 / Table 3"},
-  "jaccard_best_pair": {"value": 0.43, "source": "Sec. 4.3 / Table 3"},
-  "pct_single_tool": {"value": 70.5, "source": "Sec. 4.4 / Table 3"},
-  "pct_all_three": {"value": 11.1, "source": "Sec. 4.4"},
-  "pct_os_identified": {"value": 93.9, "source": "Sec. 4.4"},
-  "pct_debian": {"value": 38.4, "source": "Sec. 4.4"},
-  "pct_alpine": {"value": 32.8, "source": "Sec. 4.4"},
-  "pct_ubuntu": {"value": 18.1, "source": "Sec. 4.4"},
-  "pct_distroless": {"value": 6.1, "source": "Sec. 4.4"},
-  "pct_dockle_misconf": {"value": 99.7, "source": "Sec. 4.4"},
-  "pct_nonroot_missing": {"value": 89.0, "source": "Sec. 4.4"},
-  "pct_healthcheck_missing": {"value": 97.4, "source": "Sec. 4.4"},
-  "pct_creds_env": {"value": 31.7, "source": "Sec. 4.4"},
-  "secret_sample_size": {"value": 1100, "source": "Sec. 4.5"},
-  "secret_true_positives": {"value": 5, "source": "Sec. 4.5"},
-  "secret_fp_rate_pct": {"value": 99.5, "source": "Sec. 4.5 (99.55 at 2 dp)"},
-  "secret_tp_rate_pct": {"value": 0.45, "source": "Sec. 4.5"},
+  "n_drawn": {
+    "value": 4800,
+    "source": "Sec. 3 Sampling / Sec. 4.1"
+  },
+  "n_scanned": {
+    "value": 2879,
+    "source": "Sec. 3 Sampling / Table 2"
+  },
+  "pct_scanned": {
+    "value": 60.0,
+    "source": "Sec. 4.1 Reachability"
+  },
+  "pct_gone": {
+    "value": 34.9,
+    "source": "Sec. 4.1 (repositories without latest manifest)"
+  },
+  "pct_unpullable": {
+    "value": 2.4,
+    "source": "Sec. 4.1"
+  },
+  "n_unpullable": {
+    "value": 113,
+    "source": "Sec. 4.1"
+  },
+  "pct_private": {
+    "value": 0.9,
+    "source": "Sec. 4.1"
+  },
+  "pct_other_arch": {
+    "value": 0.8,
+    "source": "Sec. 4.1"
+  },
+  "pct_dnf": {
+    "value": 1.2,
+    "source": "Sec. 4.1"
+  },
+  "pct_crit": {
+    "value": 94.4,
+    "source": "Abstract / Table 2"
+  },
+  "pct_high": {
+    "value": 96.1,
+    "source": "Sec. 4.1 / Table 2"
+  },
+  "pct_any": {
+    "value": 96.8,
+    "source": "Sec. 4.1 / Table 3"
+  },
+  "pct_secret_raw": {
+    "value": 82.4,
+    "source": "Abstract / Table 2 / Table 3"
+  },
+  "median_merged": {
+    "value": 947,
+    "source": "Sec. 4.1 / Table 3"
+  },
+  "mean_merged": {
+    "value": 2939,
+    "source": "Sec. 4.1"
+  },
+  "max_merged": {
+    "value": 26511,
+    "source": "Sec. 4.1"
+  },
+  "median_distinct_cves": {
+    "value": 260,
+    "source": "Sec. 4.1"
+  },
+  "mean_distinct_cves": {
+    "value": 856.8,
+    "source": "Sec. 4.1 (857 rounded)"
+  },
+  "max_distinct_cves": {
+    "value": 8265,
+    "source": "Sec. 4.1"
+  },
+  "total_findings_millions": {
+    "value": 9.9,
+    "source": "Sec. 4.1"
+  },
+  "pct_six_scanners": {
+    "value": 62.7,
+    "source": "Sec. 4.1 panel (c)"
+  },
+  "pct_five_plus_scanners": {
+    "value": 96.1,
+    "source": "Sec. 4.1 panel (c)"
+  },
+  "z_crit": {
+    "value": 2.17,
+    "source": "Sec. 4.2"
+  },
+  "p_crit": {
+    "value": 0.03,
+    "source": "Sec. 4.2"
+  },
+  "z_high": {
+    "value": 1.46,
+    "source": "Sec. 4.2"
+  },
+  "p_high": {
+    "value": 0.15,
+    "source": "Sec. 4.2"
+  },
+  "z_any": {
+    "value": 1.21,
+    "source": "Sec. 4.2"
+  },
+  "p_any": {
+    "value": 0.23,
+    "source": "Sec. 4.2"
+  },
+  "worst_severity_modal": {
+    "value": "critical",
+    "source": "Table 3"
+  },
+  "n_official": {
+    "value": 0,
+    "source": "Sec. 4.3 / Table 3"
+  },
+  "pct_eco_os": {
+    "value": 83.4,
+    "source": "Sec. 4.3 / Fig 2(b)"
+  },
+  "pct_eco_lang": {
+    "value": 15.7,
+    "source": "Sec. 4.3 / Fig 2(b)"
+  },
+  "oldest_cve_year": {
+    "value": 1999,
+    "source": "Sec. 4.3 / Table 3"
+  },
+  "jaccard_best_pair": {
+    "value": 0.43,
+    "source": "Sec. 4.3 / Table 3"
+  },
+  "pct_single_tool": {
+    "value": 70.5,
+    "source": "Sec. 4.4 / Table 3"
+  },
+  "pct_all_three": {
+    "value": 11.1,
+    "source": "Sec. 4.4"
+  },
+  "pct_os_identified": {
+    "value": 93.9,
+    "source": "Sec. 4.4"
+  },
+  "pct_debian": {
+    "value": 38.4,
+    "source": "Sec. 4.4"
+  },
+  "pct_alpine": {
+    "value": 32.8,
+    "source": "Sec. 4.4"
+  },
+  "pct_ubuntu": {
+    "value": 18.1,
+    "source": "Sec. 4.4"
+  },
+  "pct_distroless": {
+    "value": 6.1,
+    "source": "Sec. 4.4"
+  },
+  "pct_dockle_misconf": {
+    "value": 99.7,
+    "source": "Sec. 4.4"
+  },
+  "pct_nonroot_missing": {
+    "value": 89.0,
+    "source": "Sec. 4.4"
+  },
+  "pct_healthcheck_missing": {
+    "value": 97.4,
+    "source": "Sec. 4.4"
+  },
+  "pct_creds_env": {
+    "value": 31.7,
+    "source": "Sec. 4.4"
+  },
+  "secret_sample_size": {
+    "value": 1100,
+    "source": "Sec. 4.5"
+  },
+  "secret_true_positives": {
+    "value": 5,
+    "source": "Sec. 4.5"
+  },
+  "secret_fp_rate_pct": {
+    "value": 99.5,
+    "source": "Sec. 4.5 (99.55 at 2 dp)"
+  },
+  "secret_tp_rate_pct": {
+    "value": 0.45,
+    "source": "Sec. 4.5"
+  },
   "_skip_note": "Not recomputable from committed artifacts: high-exposure column of Tables 2-3 (companion corpus), prior-work 'Reported' values (literature), frame size 12,716,568 (crawl DB), Debian-vs-Alpine 5x ratio and >1000-CVE minimal images (require the reports database; checked by verify_values.py only when BL_DB is present... see docs/REPRODUCIBILITY_REPORT.md)."
 }

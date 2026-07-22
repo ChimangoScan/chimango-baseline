@@ -9,7 +9,7 @@ official, or otherwise curated images, which leaves open how secure the *typical
 image is. We draw 4,800 repositories uniformly at random from Docker Hub's
 multi-million-repository namespace and scan the reachable subset with a six-tool
 battery (Syft, Trivy, Grype, OSV-Scanner, Dockle, TruffleHog). We find that more
-than a third of randomly drawn repositories are already gone; that among the
+than a third of randomly drawn repositories expose no latest manifest; that among the
 images that remain, a known vulnerability is near-universal and a *critical*
 vulnerability is the common case; that the raw TruffleHog secret-hit rate is
 overwhelmingly false positives once hand-labeled; and that a uniform random
@@ -380,7 +380,7 @@ database by `analysis/precompute_figdata.py`) and the committed
 
 ```
 figures/fig_panels3.pdf   per-image overview (vulns/image CDF, severity mix, scanner coverage)
-figures/fig_reach.pdf     reachability of a uniform random draw (Scanned / Gone / ...)
+figures/fig_reach.pdf     reachability of a uniform random draw (Scanned / No latest / ...)
 figures/fig_repro.pdf     reproduction of prior analyses (CVEs-by-year, ecosystem, top packages)
 figures/fig_extra.pdf     scanner agreement, base-OS distribution, secret false-positive types
 ```
@@ -437,11 +437,12 @@ numbers and every figure can be reproduced even before the database is available
 ### Claim 1 — uniform random draw and reachability
 
 > **4,800 repositories were drawn uniformly at random; 2,879 were scanned
-> (60.0%); 34.9% of the drawn repositories are already gone (deleted/renamed).**
+> (60.0%); 34.9% of the drawn repositories expose no latest manifest (the
+> repository exists but carries no default tag; see docs/REPRODUCIBILITY_REPORT.md).**
 
 - **What it shows.** The sampling design and the reachability breakdown of a
   uniform random draw of the Docker Hub namespace (a result unique to a random
-  sample: the popular head hides this decay).
+  sample: popular images always keep a resolvable latest tag).
 - **No database needed:** the reachability breakdown is precomputed into
   `analysis/figdata_baseline.json`, so the figure regenerates without
   `bl_snap.db`. The database is only needed to recompute it from scratch (full
@@ -476,7 +477,7 @@ BL_DB=data/bl_snap.db python3 analysis/make_figs.py   # full mode (from DB)
   mode needs ~2–4 GB RAM and the 10.3 GB database on local disk.
 - **Expected result.** `data/random_sample.jsonl` has 4,800 rows. `make_figs.py`
   prints the per-image summary line (`N=2879 ...`) and a `reach:` line; it writes
-  `figures/fig_reach.pdf`, whose bands are **Scanned ≈ 60%** and **Gone (404)
+  `figures/fig_reach.pdf`, whose bands are **Scanned ≈ 60%** and **No latest
   ≈ 35%**, with the remainder split across non-image (OCI artifact), private,
   and other-architecture outcomes. 2,879 / 4,800 = 60.0% scanned.
 

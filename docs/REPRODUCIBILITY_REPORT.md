@@ -29,6 +29,8 @@ the camera-ready; the artifact reproduces the corrected values exactly.
 | Base OS identified / distroless | 94.0 / 6.0% | **93.9 / 6.1%** (2,704 / 175 of 2,879) | rounding |
 | Credentials in env/files (CIS-DI-0010) | 31.6% | **31.7%** (912 / 2,879) | rounding |
 | Unpullable share of the draw | 2.3% ("non-image artifacts") | **2.4%** (113 / 4,800), relabeled *unpullable*: 48 legacy manifest schema + 28 OCI artifact + 37 other pull errors | rounding + imprecise label |
+| The 34.9% unreachable share | "gone: deleted or renamed (registry decay)" | **repositories without a `latest` manifest** (the repository exists; the default tag does not). A seeded registry check of 200 of the 1,673 (scripts/check_unresolved.py; run of record in analysis/unresolved_check.json, 2026-07-21) found 199 alive without `latest` (median last push 2023-04), 1 alive with a re-pushed `latest`, 0 deleted. The same fraction and mechanism are reported on this frame by CryptoCensus (WTICG/SBSeg 2026) | error strings ("manifest unknown") were read as deletion; the registry check disproved that |
+| The 0.9% "private" share | "private" | **denied (private or deleted)**: Docker Hub returns the same error for both by design | label narrower than the evidence |
 
 Numbers that re-verified exactly as published: N=4,800 / 2,879; 34.9% gone,
 0.9% private, 0.8% other-arch, 1.2% did-not-finish, 60.0% scanned; 94.4 / 96.1 /
