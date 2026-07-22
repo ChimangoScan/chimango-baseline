@@ -297,7 +297,9 @@ for name, c in by_cat:
 # =====================================================================
 # ============================  FIGURE  ===============================
 # =====================================================================
-fig, ax = plt.subplots(1, 3, figsize=(6.9, 1.3))
+fig = plt.figure(figsize=(6.9, 2.6))
+gs = fig.add_gridspec(2, 2, height_ratios=[1, 1.15])
+ax = [fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1]), fig.add_subplot(gs[1, :])]
 
 # --- panel (a): scanner divergence (per-image,CVE pooled) ---
 labs = ["1 scanner", "2 scanners", "3 scanners"]
@@ -307,7 +309,7 @@ b = ax[0].bar(labs, vals, color=cols)
 figstyle.grid(ax[0])
 for bb, p in zip(b, vals):
     ax[0].text(bb.get_x() + bb.get_width()/2, p + 1.5, f"{p:.0f}", ha="center", fontsize=6.3)
-ax[0].set_ylabel("% of distinct CVEs")
+ax[0].set_ylabel("% of CVEs", labelpad=2)
 ax[0].set_title("(a) Vuln-scanner agreement")
 ax[0].set_ylim(0, max(vals) * 1.2)
 ax[0].tick_params(axis="x", labelsize=6.8)
