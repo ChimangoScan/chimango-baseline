@@ -118,7 +118,7 @@ fig.tight_layout(w_pad=1.1); save(fig, "fig_panels3")
 # === Fig B: reachability of a uniform random draw (unique to this study) ===
 # Outcomes of every drawn repository (infra disk failures re-queued, excluded).
 order = [("Scanned", "scanned", GREEN), ("No latest", "gone", RED),
-         ("Unpullable", "format", "#8073ac"), ("Private", "auth", "#fdae61"),
+         ("Unpullable", "format", "#8073ac"), ("Denied", "auth", "#fdae61"),
          ("Other arch.", "arch", "#80b1d3"), ("DNF", "dnf", "#999999")]
 tot = sum(reach[k] for _, k, _ in order)
 fig, ax = plt.subplots(figsize=(6.9, 0.95))
