@@ -97,12 +97,15 @@ else:
 vpi = np.sort(np.array(vpi)); cdf = np.arange(1, len(vpi)+1)/len(vpi)*100
 med = int(np.median(vpi))
 fig, ax = plt.subplots(1, 3, figsize=(6.9, 1.3))
-ax[0].plot(np.maximum(vpi, 0.5), cdf, color=BLUE); ax[0].set_xscale("log")
+ax[0].plot(vpi, cdf, color=BLUE); ax[0].set_xscale("symlog", linthresh=1)
 figstyle.grid(ax[0]); ax[0].axvline(med, ls="--", color="#999", lw=0.8)
 ax[0].text(med*1.25, 7, f"median {med}", fontsize=6.3, color="#666")
-ax[0].set_xlabel("Pkg. vulnerabilities/image"); ax[0].set_ylabel("Cumulative %")
+ax[0].set_xlim(0, int(vpi[-1]))
+ax[0].set_xticks([0, 10, 1000, int(vpi[-1])])
+ax[0].set_xticklabels(["0", "10", "1,000", f"{int(vpi[-1]):,}"], fontsize=6.0)
+ax[0].set_xlabel("Package vulnerabilities/image"); ax[0].set_ylabel("Cumulative %")
 ax[0].set_title("(a) Vulnerabilities per image"); ax[0].set_ylim(0, 100)
-labs = ["Crit.", "High", "Med.", "Low"]; vals = [sev[k] for k in ("critical", "high", "medium", "low")]
+labs = ["Critical", "High", "Medium", "Low"]; vals = [sev[k] for k in ("critical", "high", "medium", "low")]
 pct = [100*x/sum(vals) for x in vals]
 b = ax[1].bar(labs, pct, color=SEVCOL); figstyle.grid(ax[1])
 for bb, p in zip(b, pct): ax[1].text(bb.get_x()+bb.get_width()/2, p+0.8, f"{p:.0f}", ha="center", fontsize=6.3)
@@ -146,24 +149,31 @@ ax[0].bar(yrs, cnts, color=BLUE, width=0.9); figstyle.grid(ax[0])
 ax[0].set_xlabel("CVE identifier year"); ax[0].set_ylabel("CVEs")
 ax[0].set_title("(a) CVEs by year"); ax[0].set_xticks([1999, 2012, 2026]); ax[0].set_xlim(1997.5, 2027.5)
 ep = FD["ecosystem_split"]["ours_pct"]
-b = ax[1].bar(["OS", "Lang.", "Other"], ep, color=[BLUE, "#f46d43", "#cccccc"]); figstyle.grid(ax[1])
+b = ax[1].bar(["Operating\nsystem", "Application\nlanguage", "Other"], ep, color=[BLUE, "#f46d43", "#cccccc"]); figstyle.grid(ax[1])
 for bb, p in zip(b, ep): ax[1].text(bb.get_x()+bb.get_width()/2, p+2, f"{p:.0f}", ha="center", fontsize=6.3)
 ax[1].set_ylabel("% of findings"); ax[1].set_title("(b) Severe by ecosystem"); ax[1].set_ylim(0, 112)
-labs2 = ["Shu\n2017", "Zer.\n2019", "High.\n2026", "Rand.\n2026"]
+ax[1].tick_params(axis="x", labelsize=5.2)
+labs2 = ["Shu\n2017", "Zerouali\n2019", "Exposure\nranked\n2026", "Uniform\nrandom\n2026"]
 med2 = [158, 601, 885, 947]
 b2 = ax[2].bar(labs2, med2, color=["#bbbbbb", "#bbbbbb", "#f46d43", BLUE]); figstyle.grid(ax[2])
 for bb, m in zip(b2, med2): ax[2].text(bb.get_x()+bb.get_width()/2, m+30, str(m), ha="center", fontsize=6.0)
-ax[2].set_ylabel("Median"); ax[2].set_title("(c) Median vulns/image")
-ax[2].set_ylim(0, 1150); ax[2].tick_params(axis="x", labelsize=6.0)
-studies = ["Shu et al. 2017", "Liu et al. 2020", "Dr. Docker 2025"]
-reported = [80, 64, 93.7]; highexp = [93.4, 95.6, 96.3]; rnd = [94.4, 96.6, 96.8]
+ax[2].set_ylabel("Median"); ax[2].set_title("(c) Median findings/image")
+ax[2].set_ylim(0, 1150); ax[2].tick_params(axis="x", labelsize=5.0)
+studies = ["High/critical\n(Liu et al.)", "Any vulnerability\n(Dr. Docker)"]
+reported = [64.0, 93.7]; highexp = [95.6, 96.3]; rnd = [96.4, 96.8]
 yy = np.arange(len(studies)); hh = 0.26
-ax[3].barh(yy+hh, reported, hh, color="#bbbbbb", label="reported")
-ax[3].barh(yy, highexp, hh, color="#f46d43", label="highest-exposure")
-ax[3].barh(yy-hh, rnd, hh, color=BLUE, label="random (ours)")
+bars_reported = ax[3].barh(yy+hh, reported, hh, color="#bbbbbb", label="prior study")
+bars_exposure = ax[3].barh(yy, highexp, hh, color="#f46d43", label="exposure-ranked")
+bars_random = ax[3].barh(yy-hh, rnd, hh, color=BLUE, label="uniform random")
+for i, (bar, value) in enumerate(zip(bars_reported, reported)):
+    label = ">64" if i == 0 else f"{value:.1f}"
+    ax[3].text(value - 1.2, bar.get_y()+bar.get_height()/2, label, ha="right", va="center", fontsize=5.8)
+for bars, values in ((bars_exposure, highexp), (bars_random, rnd)):
+    for bar, value in zip(bars, values):
+        ax[3].text(value - 1.2, bar.get_y()+bar.get_height()/2, f"{value:.1f}", ha="right", va="center", fontsize=5.8, color="white")
 ax[3].set_yticks(yy); ax[3].set_yticklabels(studies, fontsize=6.5)
 ax[3].set_xlim(0, 100)
-ax[3].set_title("(d) Prevalence vs. prior reports"); figstyle.grid(ax[3], "x")
+ax[3].set_title("(d) Rates under comparable definitions"); figstyle.grid(ax[3], "x")
 ax[3].legend(fontsize=6.2, ncol=3, loc="upper center", bbox_to_anchor=(0.5, -0.22), frameon=False, columnspacing=1.2, handlelength=1.3)
 top = R["shu2017"]["ours_random"]["top10_packages"][:6][::-1]
 ax[4].barh([p["package"] for p in top], [p["pct_corpus"] for p in top], color=GREEN)

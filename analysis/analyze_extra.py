@@ -310,7 +310,7 @@ figstyle.grid(ax[0])
 for bb, p in zip(b, vals):
     ax[0].text(bb.get_x() + bb.get_width()/2, p + 1.5, f"{p:.0f}", ha="center", fontsize=6.3)
 ax[0].set_ylabel("% of CVEs", labelpad=2)
-ax[0].set_title("(a) Vuln-scanner agreement")
+ax[0].set_title("(a) Vulnerability-scanner agreement")
 ax[0].set_ylim(0, max(vals) * 1.2)
 ax[0].tick_params(axis="x", labelsize=6.8)
 
@@ -330,7 +330,7 @@ figstyle.grid(ax[1], "x")
 for rect, p in zip(bb, shares):
     ax[1].text(p + 1.0, rect.get_y() + rect.get_height()/2, f"{p:.0f}", va="center", fontsize=6.3)
 ax[1].set_xlabel("% of images")
-ax[1].set_title("(b) Base OS distribution")
+ax[1].set_title("(b) Base distribution")
 ax[1].set_xlim(0, max(shares) * 1.18)
 ax[1].tick_params(axis="y", labelsize=6.5)
 
@@ -342,7 +342,7 @@ relabel = {
     "package-hash": "Package hash", "example/placeholder": "Example/placeholder",
     "binary/asset": "Binary/asset", "dependency-lock": "Dependency lock",
     "test-fixture": "Test fixture", "bare-hash": "Bare hash",
-    "identifier/uuid": "Identifier/UUID",
+    "identifier/uuid": "Identifier",
 }
 fp_buckets.sort(key=lambda t: t[1])     # ascending for barh
 cnames = [relabel.get(n_, n_) for n_, _ in fp_buckets]
