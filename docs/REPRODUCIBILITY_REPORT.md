@@ -42,6 +42,11 @@ z=1.21 (p=0.23); oldest CVE 1999; 0 official repositories.
 
 ## Known limitations and inconsistencies
 
+- **Scanner environment.** The six configured scanner images use floating
+  `latest` tags, and the vulnerability databases are fetched at scan time.
+  Immutable image digests and database snapshots from the original campaigns
+  were not preserved in this repository. The released reports are the record
+  of those campaigns; rerunning the scan can resolve newer software and data.
 - **Secret sample snapshot (verified empirically).** The committed
   1,100-detection sample (`secret_sample_baseline.jsonl`, seed 20260522) was
   drawn while the scan campaign was still running: reconstructing the corpus
@@ -67,10 +72,10 @@ z=1.21 (p=0.23); oldest CVE 1999; 0 official repositories.
   (status `skipped`) are classified by error text. Earlier artifact revisions
   classified purely by error text, which mixed the two; the committed classifier
   now matches the paper taxonomy.
-- **Companion counts.** The two-proportion z-tests compare against the
-  high-exposure corpus's exact image counts (49,392 / 50,534 / 50,957 of
+- **Exposure-ranked counts.** The two-proportion z-tests compare against the
+  exposure-ranked corpus's exact image counts (49,392 / 50,534 / 50,957 of
   52,895), hardcoded in `stats_baseline.py`; they are not recomputable from this
-  repository's data (the companion corpus is a separate release).
+  repository's data (that corpus is a separate release).
 - **OSV severity cache.** `repro_baseline.py` accepts an optional
   `OSV_CACHE` severity backfill that is not shipped; all committed outputs and
   all paper numbers are produced without it.
@@ -83,15 +88,15 @@ z=1.21 (p=0.23); oldest CVE 1999; 0 official repositories.
 ## Verification (auto)
 
 `./reproduce.sh verify` compares every number the paper asserts
-(`expected/paper_values.json`, 49 checks) exactly against the committed
+(`expected/paper_values.json`, 66 checks) exactly against the committed
 analysis outputs:
 
 ```
-verify: 49 pass, 0 fail
+verify: 66 pass, 0 fail
 ```
 
-Not recomputable from this repository (SKIP by design): the high-exposure
+Not recomputable from this repository (SKIP by design): the exposure-ranked
 column of Tables 2–3 and the prior-work "Reported" values (literature /
-companion corpus), and the 12,716,568-repository frame size (crawl database).
+separate corpus), and the 12,716,568-repository frame size (crawl database).
 The Debian-vs-Alpine ratio and the >1,000-CVE minimal-image examples require
-`bl_snap.db` (reproduced by `./reproduce.sh full --db`).
+`bl_snap.db` (reproduced by `./reproduce.sh analyze --db`).

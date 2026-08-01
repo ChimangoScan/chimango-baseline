@@ -1,8 +1,8 @@
 # Reproducing Prior Docker Hub Analyses on the Uniform-Random Baseline
 
 This reproduces, on our **uniform-random** Docker Hub sample (the control group),
-the same concrete analyses the companion paper reproduced on its high-exposure
-head (companion Sec. "Reproducing Prior Docker Hub Analyses", `tab:repro`). All
+the same concrete analyses the exposure-ranked paper reproduced
+(Sec. "Reproducing Prior Docker Hub Analyses", `tab:repro`). All
 comparisons are **directional, not like-for-like**: scanner, sample and elapsed
 time differ from every cited study. Per-image vulnerability counts are the raw
 finding count **merged** across the three vulnerability scanners (trivy, grype,
@@ -16,7 +16,7 @@ alongside, and a deduplicated-distinct count is given as a robustness note.
   `library/` images — Docker Hub has on the order of ~160 official repositories
   out of millions, so the probability of sampling one is negligible. This is
   itself a result (see Liu, below).
-- **Method**: one read-only streaming pass mirroring the companion's
+- **Method**: one read-only streaming pass mirroring the exposure-ranked study's
   `recount_repo.py`: severity rank `unknown<info<low<medium<high<critical`;
   worst-severity over `pkg-vuln` findings only; `clair` skipped; `dockle high ->
   critical`; `osv` unknown severities left as unknown unless an optional
@@ -81,8 +81,8 @@ alongside, and a deduplicated-distinct count is given as a robustness note.
   on (*diverges upward*). The official comparison **cannot be reproduced on a
   uniform random sample**: official images are too rare in the population to be
   sampled. This is a genuine measurement caveat of the control group, not a data
-  defect, and is exactly why the companion paper used a curated exposure-ranked
-  corpus for the official-vs-community split. The companion (high-exposure)
+  defect, and is exactly why the exposure-ranked paper used a curated corpus
+  for the official-vs-community split. That corpus
   measured 93.8% official / 95.6% community; our random community figure (96.4%)
   is consistent with its community side.
 
@@ -92,12 +92,12 @@ alongside, and a deduplicated-distinct count is given as a robustness note.
 - Ours: of **2,310,145** high/critical findings, **83.4% fall in OS package
   ecosystems** and **15.7% in language ecosystems** (0.9% other). Top language
   ecosystems: Go (57,599), go-module (50,890), npm (46,651), binary (36,530).
-- **Interpretation.** *Diverges* from Wist in the same direction the companion
-  reported (companion: 76.9% OS / 21.7% lang): even a uniform random sample is
+- **Interpretation.** *Diverges* from Wist in the same direction the exposure-ranked study
+  reported (76.9% OS / 21.7% lang): even a uniform random sample is
   dominated by OS-package vulnerability surface rather than language
   dependencies. Wist's application-oriented sample surfaced language deps; both
-  our random and the companion's exposure-ranked corpora are OS-dominated. The
-  random sample skews *even more* toward OS than the high-exposure head.
+  both random and exposure-ranked corpora are OS-dominated. The random sample
+  skews *even more* toward OS than the exposure-ranked sample.
 
 ### Mills et al. (2023)
 - Reported: some images still report CVEs as old as **1999**; staleness effect
@@ -107,7 +107,7 @@ alongside, and a deduplicated-distinct count is given as a robustness note.
   `repository_namespace` / `repository_name` / `tag_name`, with no
   `last_updated` / registry timestamp, so vulns-vs-age cannot be regressed here.
 - **Interpretation.** *Confirms* the long unpatched tail (CVEs back to 1999). The
-  staleness regression the companion ran (it had registry `last_updated` for
+  staleness regression the exposure-ranked study ran (it had registry `last_updated` for
   96.5% of its corpus) is unavailable in this baseline snapshot and is reported
   as not computable rather than estimated.
 
@@ -123,13 +123,13 @@ alongside, and a deduplicated-distinct count is given as a robustness note.
   keys are the dominant leaked-secret category.
 - Ours (**detector level only**, no manual validation — done by a separate
   agent): TruffleHog flags an embedded secret in **82.4%** of images (2,372), and
-  a *private-key* pattern in **45.5%** (1,309; companion rule: `privatekey`/
+  a *private-key* pattern in **45.5%** (1,309; shared rule: `privatekey`/
   `private` in title or `privatekey` in id). A broader `key`-substring rule gives
   54.1%. Top detectors: Box (92,393 hits), URI (27,111), **PrivateKey (13,324)**,
   BingSubscriptionKey (10,913); 206,096 secret findings total over the N=2,879
   corpus. (The frozen hand-validation sample in `secret_validation_baseline.json`
   was drawn from an earlier ~169,528-detection snapshot; see below.)
-- **Interpretation.** Comparable to the companion's **76.9% raw detector rate**,
+- **Interpretation.** Comparable to the exposure-ranked study's **76.9% raw detector rate**,
   **NOT** to Dahlmanns' 8.5% validated rate. The detector hit rate sits far above
   the validated figure, consistent with Dahlmanns' and Dr. Docker's own
   observation that most raw secret hits are example/test material. The 45.5%
@@ -142,7 +142,7 @@ alongside, and a deduplicated-distinct count is given as a robustness note.
 ## Figure data (ready to plot)
 
 All arrays are in `repro_baseline.json` under `figure_data`. For a compact
-3-panel figure mirroring the companion's `fig_repro_panel` + `fig_shu_panel`:
+3-panel figure mirroring the exposure-ranked study's `fig_repro_panel` + `fig_shu_panel`:
 
 - **(a) Official vs community high/critical prevalence** — `figure_data.
   official_vs_community_prevalence`: groups `[Official, Community]`,

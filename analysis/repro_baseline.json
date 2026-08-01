@@ -339,7 +339,7 @@
         ]
       ],
       "n_secret_findings": 206096,
-      "caveat": "detector-level only; manual validation done separately. Comparable to the companion's 76.9% raw detector rate, NOT to Dahlmanns' 8.5% validated rate."
+      "caveat": "detector-level only; manual validation done separately. Comparable to the exposure-ranked study's 76.9% raw detector rate, NOT to Dahlmanns' 8.5% validated rate."
     }
   },
   "figure_data": {

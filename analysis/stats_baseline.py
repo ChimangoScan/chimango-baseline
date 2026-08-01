@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Statistical companions to the headline prevalences: the two-proportion z-tests
-against the high-exposure corpus, the pairwise scanner-agreement Jaccard
+Statistical checks for the headline prevalences: the two-proportion z-tests
+against the exposure-ranked corpus, the pairwise scanner-agreement Jaccard
 indices, unique-CVE (deduplicated) per-image counts, and the total finding
 count. These are the paper numbers that repro_baseline.py / precompute_figdata.py
 do not emit.
@@ -24,9 +24,9 @@ OUT = os.environ.get("BL_OUT", _HERE)
 VULN_SCANNERS = ("trivy", "grype", "osv")
 CVE_RE = re.compile(r"^CVE-\d{4}-\d+$", re.I)
 
-# High-exposure corpus (companion paper): exact image counts over N=52,895.
-COMPANION_N = 52895
-COMPANION = {"critical": 49392, "high": 50534, "any": 50957}
+# Exposure-ranked corpus: exact image counts over N=52,895.
+EXPOSURE_N = 52895
+EXPOSURE = {"critical": 49392, "high": 50534, "any": 50957}
 
 
 def ztest(x1, n1, x2, n2):
@@ -95,9 +95,9 @@ def main():
         "N": N,
         "total_findings": total_findings,
         "ztests": {
-            "critical": ztest(crit, N, COMPANION["critical"], COMPANION_N),
-            "high": ztest(high, N, COMPANION["high"], COMPANION_N),
-            "any": ztest(anyv, N, COMPANION["any"], COMPANION_N),
+            "critical": ztest(crit, N, EXPOSURE["critical"], EXPOSURE_N),
+            "high": ztest(high, N, EXPOSURE["high"], EXPOSURE_N),
+            "any": ztest(anyv, N, EXPOSURE["any"], EXPOSURE_N),
         },
         "jaccard_image_cve": jacc,
         "jaccard_best_pair": max(jacc.items(), key=lambda kv: kv[1]),

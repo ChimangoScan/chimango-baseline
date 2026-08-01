@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """
 Reproduce prior Docker Hub measurement analyses on the UNIFORM-RANDOM baseline
-sample (control group), mirroring the companion paper's "Reproducing Prior
-Docker Hub Analyses" section (tab:repro) but over the random sample instead of
-the high-exposure head.
+sample, mirroring the exposure-ranked paper's "Reproducing Prior Docker Hub
+Analyses" section (tab:repro) but over the random sample.
 
 One read-only streaming pass over the reports SQLite (reports table).
-Methodology mirrors the companion paper's recount so the two are like-for-like:
+Methodology mirrors the exposure-ranked paper's recount so the two are like-for-like:
   - severity rank unknown<info<low<medium<high<critical
   - worst-severity per image computed over pkg-vuln findings only
   - clair findings skipped; dockle high -> critical; osv unknown severities
@@ -17,7 +16,7 @@ Methodology mirrors the companion paper's recount so the two are like-for-like:
   - eco_class OS vs language uses the same OS_ECO/LANG_ECO sets
   - CVE-by-year from CVE-AAAA-NNNN identifiers in cves[]
   - private-key category: 'privatekey'/'private' in title or 'privatekey' in id
-    (companion rule), plus a broader 'key'-substring rate reported separately
+    (shared rule), plus a broader 'key'-substring rate reported separately
 
 Outputs (under $BL_OUT, default: this script's directory):
   repro_baseline.json
@@ -144,7 +143,7 @@ def main():
 
     # Dahlmanns: secrets
     img_with_secret = 0
-    img_with_pk = 0                     # companion private-key rule
+    img_with_pk = 0                     # shared private-key rule
     img_with_key_broad = 0              # broader 'key' substring rule
     sec_detector = Counter()
     n_secret_findings = 0
@@ -470,7 +469,7 @@ def main():
                 "secret_detector_top": sec_detector.most_common(20),
                 "n_secret_findings": n_secret_findings,
                 "caveat": ("detector-level only; manual validation done "
-                           "separately. Comparable to the companion's 76.9% "
+                           "separately. Comparable to the exposure-ranked study's 76.9% "
                            "raw detector rate, NOT to Dahlmanns' 8.5% "
                            "validated rate."),
             },

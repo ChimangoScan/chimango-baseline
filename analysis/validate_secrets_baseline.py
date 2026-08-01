@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 Ground-truth validation of TruffleHog secret detections on the baseline corpus
-(the reports SQLite). Replicates the companion high-exposure paper's manual
-FP-validation at the same sample size (n=1100).
+(the reports SQLite). Repeats the exposure-ranked study's manual FP-validation
+at the same sample size (n=1100).
 
 WHAT THIS SCRIPT IS (AND IS NOT)
 --------------------------------

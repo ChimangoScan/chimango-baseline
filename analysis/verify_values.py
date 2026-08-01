@@ -43,6 +43,10 @@ def main():
     got = {
         "n_drawn": n_drawn,
         "n_scanned": N,
+        "n_without_latest": reach["gone"],
+        "n_denied": reach["auth"],
+        "n_other_arch": reach["arch"],
+        "n_dnf": reach["dnf"],
         "pct_scanned": round(100 * reach["scanned"] / n_drawn, 1),
         "pct_gone": round(100 * reach["gone"] / n_drawn, 1),
         "pct_unpullable": round(100 * reach["format"] / n_drawn, 1),
@@ -61,6 +65,7 @@ def main():
         "mean_distinct_cves": uc["mean"],
         "max_distinct_cves": uc["max"],
         "total_findings_millions": round(st["total_findings"] / 1e6, 1),
+        "package_findings_millions": round(sum(p3["vpi_sorted"]) / 1e6, 1),
         "pct_six_scanners": round(100 * cov.get(6, 0) / N, 1),
         "pct_five_plus_scanners": round(
             100 * (cov.get(6, 0) + cov.get(5, 0)) / N, 1),
@@ -73,13 +78,18 @@ def main():
         "worst_severity_modal": rb["shu2017"]["ours_random"][
             "worst_severity_modal"],
         "n_official": rb["liu2020"]["ours_random"]["n_official"],
+        "n_community": rb["liu2020"]["ours_random"]["n_community"],
+        "n_community_severe": rb["liu2020"]["ours_random"]["community_high_or_crit"],
+        "pct_community_severe": rb["liu2020"]["ours_random"]["community_hc_pct"],
         "pct_eco_os": rb["wist2021"]["ours_random"]["eco_class_pct"]["os"],
         "pct_eco_lang": rb["wist2021"]["ours_random"]["eco_class_pct"]["lang"],
+        "n_severe_findings": rb["wist2021"]["ours_random"]["n_severe_findings"],
         "oldest_cve_year": rb["mills2023"]["ours_random"]["oldest_cve_year"],
         "jaccard_best_pair": st["jaccard_best_pair"][1],
         "pct_single_tool": round(100 * dv["img_share"]["1"] / share_tot, 1),
         "pct_all_three": round(100 * dv["img_share"]["3"] / share_tot, 1),
         "pct_os_identified": round(100 * (N - fe["n_os_unknown"]) / N, 1),
+        "n_os_identified": N - fe["n_os_unknown"],
         "pct_debian": round(100 * oc["Debian"] / N, 1),
         "pct_alpine": round(100 * oc["Alpine"] / N, 1),
         "pct_ubuntu": round(100 * oc["Ubuntu"] / N, 1),
@@ -90,8 +100,15 @@ def main():
         "pct_creds_env": round(100 * dockle["CIS-DI-0010"] / N, 1),
         "secret_sample_size": sv["sample_size"],
         "secret_true_positives": sv["true_positives"],
+        "secret_false_positives": sv["false_positives"],
+        "secret_population_at_draw": sv["population_secret_detections"],
+        "secret_candidates": sv["candidate_credentials_unconfirmed"],
         "secret_fp_rate_pct": round(sv["fp_rate_pct"], 1),
         "secret_tp_rate_pct": sv["tp_rate_pct"],
+        "secret_fp_ci_low_pct": sv["fp_rate_wilson_ci95_pct"][0],
+        "secret_fp_ci_high_pct": sv["fp_rate_wilson_ci95_pct"][1],
+        "secret_tp_ci_low_pct": sv["tp_rate_wilson_ci95_pct"][0],
+        "secret_tp_ci_high_pct": sv["tp_rate_wilson_ci95_pct"][1],
     }
 
     n_pass = n_fail = 0

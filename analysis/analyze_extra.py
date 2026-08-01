@@ -10,7 +10,7 @@ Analyses:
 
 Data sources, in order of preference:
   * If the reports database exists (BL_DB points at an existing file), every
-    analysis is computed from it in one streaming pass (full mode).
+    analysis is computed from it in one streaming pass (database mode).
   * Otherwise the shipped precomputed arrays (analysis/figdata_baseline.json,
     produced by analysis/precompute_figdata.py) are used, so the figure and the
     headline numbers regenerate with NO database (precomputed mode, the default).
@@ -53,7 +53,7 @@ def family_of(distro_tag):
 
 
 def from_db():
-    """One streaming pass over the reports table (full mode)."""
+    """One streaming pass over the reports table (database mode)."""
     con = sqlite3.connect(f"file:{DB}?immutable=1", uri=True)
     N = 0
     overall_sets = {s: set() for s in VULN_SCANNERS}   # distinct CVEs overall, per scanner
@@ -143,7 +143,7 @@ def from_db():
                          round(np.mean(percell_by2), 1) if percell_by2 else 0.0,
                          round(np.mean(percell_by3), 1) if percell_by3 else 0.0],
         "trio_ok": dict(trio_ok_count),
-        "os_counter": os_counter.most_common(10),
+        "os_counter": os_counter.most_common(),
         "n_os_unknown": sum(1 for x in img_os if x is None),
         "dockle_top": dockle_id_imgcount.most_common(8),
         "dockle_title": dockle_title,
@@ -257,7 +257,7 @@ print(f"     by all 3     : {ic3:7d}  ({ic_pct[2]:.1f}%)")
 print()
 print(f"  PER-IMAGE mean of within-image fractions:")
 print(f"     by1={pi1:.1f}%  by2={pi2:.1f}%  by3={pi3:.1f}%")
-print(f"  [high-exposure head reported ~66.8% single / 2.7% all-three]")
+print(f"  [exposure-ranked sample reported ~66.8% single / 2.7% all-three]")
 
 # ============================================================ (2) OS DISTRIBUTION
 n_os_known = sum(os_counter.values())

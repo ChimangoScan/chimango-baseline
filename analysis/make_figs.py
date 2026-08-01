@@ -7,7 +7,7 @@ of prior analyses on the random sample.
 Data sources, in order of preference:
   * If the reports database exists (BL_DB points at an existing file), the
     per-image and reachability panels are computed from it in one streaming pass
-    (full mode).
+    (database mode).
   * Otherwise the shipped precomputed arrays (analysis/figdata_baseline.json,
     produced by analysis/precompute_figdata.py) are used, so every figure
     regenerates with NO database and no network (precomputed mode, the default).
@@ -41,7 +41,7 @@ def save(fig, name):
 
 
 def from_db():
-    """One streaming pass over the reports + jobs tables (full mode)."""
+    """One streaming pass over the reports + jobs tables (database mode)."""
     vpi = []
     sev = {"critical": 0, "high": 0, "medium": 0, "low": 0}
     cov = {}

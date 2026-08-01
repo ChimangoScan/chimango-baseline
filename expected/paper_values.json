@@ -8,6 +8,22 @@
     "value": 2879,
     "source": "Sec. 3 Sampling / Table 2"
   },
+  "n_without_latest": {
+    "value": 1673,
+    "source": "Sec. 4.1 Reachability"
+  },
+  "n_denied": {
+    "value": 42,
+    "source": "Sec. 4.1 Reachability"
+  },
+  "n_other_arch": {
+    "value": 36,
+    "source": "Sec. 4.1 Reachability"
+  },
+  "n_dnf": {
+    "value": 57,
+    "source": "Sec. 4.1 Reachability"
+  },
   "pct_scanned": {
     "value": 60.0,
     "source": "Sec. 4.1 Reachability"
@@ -80,6 +96,10 @@
     "value": 9.9,
     "source": "Sec. 4.1"
   },
+  "package_findings_millions": {
+    "value": 8.5,
+    "source": "Sec. 4.1"
+  },
   "pct_six_scanners": {
     "value": 62.7,
     "source": "Sec. 4.1 panel (c)"
@@ -120,6 +140,18 @@
     "value": 0,
     "source": "Sec. 4.3 / Table 3"
   },
+  "n_community": {
+    "value": 2879,
+    "source": "Sec. 4.3 / Table 3"
+  },
+  "n_community_severe": {
+    "value": 2776,
+    "source": "Table 3"
+  },
+  "pct_community_severe": {
+    "value": 96.4,
+    "source": "Table 3"
+  },
   "pct_eco_os": {
     "value": 83.4,
     "source": "Sec. 4.3 / Fig 2(b)"
@@ -127,6 +159,10 @@
   "pct_eco_lang": {
     "value": 15.7,
     "source": "Sec. 4.3 / Fig 2(b)"
+  },
+  "n_severe_findings": {
+    "value": 2310145,
+    "source": "Sec. 4.3 / Fig. 2(b)"
   },
   "oldest_cve_year": {
     "value": 1999,
@@ -146,6 +182,10 @@
   },
   "pct_os_identified": {
     "value": 93.9,
+    "source": "Sec. 4.4"
+  },
+  "n_os_identified": {
+    "value": 2704,
     "source": "Sec. 4.4"
   },
   "pct_debian": {
@@ -188,6 +228,18 @@
     "value": 5,
     "source": "Sec. 4.5"
   },
+  "secret_false_positives": {
+    "value": 1095,
+    "source": "Sec. 4.5"
+  },
+  "secret_population_at_draw": {
+    "value": 169528,
+    "source": "Sec. 4.5 / Appendix A"
+  },
+  "secret_candidates": {
+    "value": 1,
+    "source": "Appendix A"
+  },
   "secret_fp_rate_pct": {
     "value": 99.5,
     "source": "Sec. 4.5 (99.55 at 2 dp)"
@@ -196,5 +248,21 @@
     "value": 0.45,
     "source": "Sec. 4.5"
   },
-  "_skip_note": "Not recomputable from committed artifacts: high-exposure column of Tables 2-3 (companion corpus), prior-work 'Reported' values (literature), frame size 12,716,568 (crawl DB), Debian-vs-Alpine 5x ratio and >1000-CVE minimal images (require the reports database; checked by verify_values.py only when BL_DB is present... see docs/REPRODUCIBILITY_REPORT.md)."
+  "secret_fp_ci_low_pct": {
+    "value": 98.94,
+    "source": "Sec. 4.5"
+  },
+  "secret_fp_ci_high_pct": {
+    "value": 99.81,
+    "source": "Sec. 4.5"
+  },
+  "secret_tp_ci_low_pct": {
+    "value": 0.19,
+    "source": "Sec. 4.5"
+  },
+  "secret_tp_ci_high_pct": {
+    "value": 1.06,
+    "source": "Sec. 4.5"
+  },
+  "_skip_note": "Not recomputable from committed artifacts: exposure-ranked column of Tables 2-3 (separate corpus), prior-work 'Reported' values (literature), frame size 12,716,568 (crawl DB), Debian-vs-Alpine 5x ratio and >1000-CVE minimal images (require the reports database; see docs/REPRODUCIBILITY_REPORT.md)."
 }

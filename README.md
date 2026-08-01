@@ -19,10 +19,10 @@ uniform sample. This repository contains the sampling code, the canonical random
 draw, the analysis and reproduction scripts, the hand-labeled secret-validation
 sample, and instructions for re-running the scan.
 
-This is the *control group* (uniform random sample) companion to a separate
-highest-exposure measurement study (ChimangoScan). The scanning pipeline itself is a separate,
-reusable project (see [Installation](#installation)); this repository wires it to
-the random sample and reproduces the paper's claims.
+This uniform-random measurement uses the same scanner pipeline as our separate
+exposure-ranked study. The scanning pipeline itself is a reusable project (see
+[Installation](#installation)); this repository applies it to the random sample
+and reproduces the paper's claims.
 
 ---
 
@@ -49,8 +49,8 @@ Repository contents:
 chimango-baseline/
 ├── README.md                       this file (artifact guide)
 ├── LICENSE                         MIT
-├── Makefile                        reproduction entry points (precomputed / full / verify)
-├── reproduce.sh                    reproduction driver (precomputed / full / verify)
+├── Makefile                        reproduction entry points (precomputed / analyze / scan / verify)
+├── reproduce.sh                    reproduction driver (precomputed / analyze / scan / verify)
 ├── expected/
 │   └── paper_values.json           every number the paper asserts, with source locator
 ├── docs/
@@ -69,7 +69,7 @@ chimango-baseline/
     ├── figdata_baseline.json       precomputed figure arrays (figures regenerate with no database)
     ├── make_figs.py                paper figures (per-image overview, reachability, reproduction)
     ├── analyze_extra.py            extra analyses + the scanner-agreement / OS / secret-FP figure
-    ├── stats_baseline.py           z-tests vs the high-exposure corpus, Jaccard, distinct-CVE dedup
+    ├── stats_baseline.py           z-tests vs the exposure-ranked corpus, Jaccard, distinct-CVE dedup
     ├── stats_baseline.json         numeric output of stats_baseline.py
     ├── verify_values.py            exact check of every paper number (reproduce.sh verify)
     ├── figstyle.py                 shared matplotlib style
@@ -184,10 +184,10 @@ so the analysis and reproduction scripts run without it.
 downloads and decompresses the released reports database; on Debian/Ubuntu:
 `apt install curl zstd`).
 
-**Scanners (the six-tool battery).** Run as pinned Docker images by the
-`ChimangoScan/scanners` pipeline. The exact registry (image + invocation per
-scanner) is in that repository under `config/scanners.yaml`; the six static
-scanners used for this study are:
+**Scanners (the six-tool battery).** Run as Docker images by the
+`ChimangoScan/scanners` pipeline. The registry (image reference + invocation
+per scanner) is maintained in that repository under `config/scanners.yaml`;
+the six static scanners used for this study are:
 
 | Scanner | Role | Docker image |
 |---|---|---|
@@ -198,10 +198,13 @@ scanners used for this study are:
 | Dockle | image/config best-practice lint | `goodwithtech/dockle:latest` |
 | TruffleHog | embedded secrets | `trufflesecurity/trufflehog:latest` |
 
-The pipeline pins each scanner by Docker image (the `:latest` tags resolved at
-run time on the dates noted in the paper); `config/scanners.yaml` in the
-`scanners` repository is the source of truth for the exact invocation of each
-tool. Vulnerability databases (Trivy, Grype, OSV) are fetched at scan time.
+These are floating image references, not immutable digests. They resolve at
+run time, and the vulnerability databases used by Trivy, Grype, and OSV are
+also fetched at scan time. The released reports and precomputed outputs are
+therefore the immutable record of the measured campaigns; a new scan uses the
+same configured references and invocations but can resolve newer tools or
+databases. This artifact does not claim software-level replay of the original
+scanner environment.
 
 **Docker.** Required only for the scanning step (not for the analyses). Any
 recent Docker Engine on `linux/amd64`. The pipeline also expects Docker Hub
@@ -356,8 +359,9 @@ scripts read the committed `analysis/repro_baseline.json` and
 
 ## Reproduction
 
-Reproduction is fully automated, via a top-level `Makefile` and `reproduce.sh`,
-in two modes.
+Reproduction is exposed through a top-level `Makefile` and `reproduce.sh`.
+Analysis and scanning are deliberately separate: an analysis command never
+claims to have produced a new scanner database.
 
 ### Precomputed (no database, no network) — recommended
 
@@ -389,31 +393,34 @@ The scripts print the headline line `N=2879 anyvuln=96.8% crit=94.4% ...`,
 matching the paper. Expected runtime: a few seconds after install. Expected
 resources: only Python + matplotlib (no database, ~no RAM).
 
-### Full (run the pipeline end-to-end)
+### Analysis from the full reports database
 
-Draws a uniform random sample of `N` repositories and runs the six-scanner
-pipeline at configurable scale, then recomputes the committed outputs and
-figures from the resulting reports database.
+Downloads the released database when necessary, then recomputes the committed
+outputs and figures. This mode performs analysis only and never implies that
+the scanners were rerun.
 
 ```bash
 ./reproduce.sh dataset                        # download + verify + decompress the released DB into data/ (~40 s measured; bandwidth-dependent; needs ~11 GB free)
-./reproduce.sh full                           # analyze the released DB end-to-end and verify all 49 paper values (~6 min measured)
-./reproduce.sh full --n 20                    # or:  make full N=20  (small-scale rescan path)
-./reproduce.sh full --n 20 --db data/bl_snap.db   # analyze a DB you already have
+./reproduce.sh analyze                        # analyze the released DB and verify 66 data-backed paper values (~6 min measured)
+./reproduce.sh analyze --db data/bl_snap.db   # analyze a DB you already have
 ```
 
-Full mode needs a working **Docker** daemon and the separate scanner pipeline
-(`ChimangoScan/scanners`; see [Installation](#installation)); set
-`SCANNERS_DIR` to its checkout, and `MONGO_URI` to draw a fresh sample from a
-crawl (otherwise the first `N` rows of the shipped canonical draw are used so
-the pipeline can still be exercised). The default `N` is small so it runs on a
-laptop. **Full-scale reproduction** (the paper's 4,800-repository draw, 10.3 GB
-of reports across the six tools) is bandwidth- and disk-bound and was run across
-several machines — that scale needs the authors' multi-machine setup, but the
-exact commands and the baseline-specific scanner configuration are documented in
-full under [Installation](#installation). Once a reports database exists, point
-the analysis at it with `--db` / `BL_DB` to recompute every committed output and
-figure from scratch.
+### New scan
+
+Scanning is a distinct, state-changing operation and requires a prepared
+`ChimangoScan/scanners` checkout whose `config/config.yaml` points to
+`data/random_sample.jsonl` and selects the six tools documented above:
+
+```bash
+./reproduce.sh scan --scanners-dir /path/to/scanners
+```
+
+Unlike the former combined driver, this command executes `seed`, `run`, and
+`report` and fails if the pipeline, config, Docker, or `uv` is unavailable. It
+never falls back to the released database. Full-scale scanning of the 4,800
+repositories is bandwidth- and disk-bound and was run across several machines.
+After scanning, pass the produced database explicitly to
+`./reproduce.sh analyze --db`.
 
 The per-Claim commands below give the exact invocation, expected runtime,
 resources, and expected result for each headline claim of the paper.
@@ -467,13 +474,13 @@ Reachability breakdown + the reachability figure (precomputed; no database):
 
 ```bash
 python3 analysis/make_figs.py                       # uses figdata_baseline.json
-BL_DB=data/bl_snap.db python3 analysis/make_figs.py   # full mode (from DB)
+BL_DB=data/bl_snap.db python3 analysis/make_figs.py   # database mode
 ```
 
 - **Expected runtime:** seconds for `wc`; seconds for `make_figs.py` in
-  precomputed mode (~3–4 minutes in full mode: one streaming pass over the
+  precomputed mode (~3–4 minutes in database mode: one streaming pass over the
   reports plus the `jobs` table).
-- **Expected resources:** precomputed mode needs only Python + matplotlib; full
+- **Expected resources:** precomputed mode needs only Python + matplotlib; database
   mode needs ~2–4 GB RAM and the 10.3 GB database on local disk.
 - **Expected result.** `data/random_sample.jsonl` has 4,800 rows. `make_figs.py`
   prints the per-image summary line (`N=2879 ...`) and a `reach:` line; it writes
@@ -500,17 +507,17 @@ BL_DB=data/bl_snap.db python3 analysis/make_figs.py   # full mode (from DB)
 python3 analysis/make_figs.py
 python3 analysis/analyze_extra.py
 
-# (b) recompute the committed outputs from scratch (full mode, needs the DB):
+# (b) recompute the committed outputs from scratch (database mode):
 #     the reproduction pass and the precomputed figure arrays
 BL_DB=data/bl_snap.db BL_OUT=analysis python3 analysis/repro_baseline.py
 BL_DB=data/bl_snap.db BL_OUT=analysis python3 analysis/precompute_figdata.py
 BL_DB=data/bl_snap.db python3 analysis/make_figs.py
 ```
 
-- **Expected runtime:** seconds in precomputed mode; ~3–4 minutes each in full
+- **Expected runtime:** seconds in precomputed mode; ~3–4 minutes each in database
   mode (one streaming pass over ~2,879 reports; `repro_baseline.py` took ~130 s
   for the paper).
-- **Expected resources:** precomputed mode needs only Python + matplotlib; full
+- **Expected resources:** precomputed mode needs only Python + matplotlib; database
   mode needs ~2–4 GB RAM and the 10.3 GB database on local disk.
 - **Expected result.** `make_figs.py` prints, e.g.,
   `N=2879 anyvuln=96.8% crit=94.4% high=96.1% secret=82.4% median=947`. In
@@ -567,7 +574,7 @@ sample and re-attaches those verdicts to reproduce the methodology.
   (`analysis/repro_baseline.json` →
   `dahlmanns2023.ours_random.img_with_secret_pct`). In the hand-labeled n=1,100
   sample: **5 true positives**, **false-positive rate 99.55%** (Wilson 95% CI
-  98.94–99.81%), consistent with the companion study's 99.7%. The dominant
+  98.94–99.81%), consistent with the exposure-ranked study's 99.7%. The dominant
   false-positive classes are package hashes, example/placeholder values, library
   bytes, and dependency-lock artifacts.
 

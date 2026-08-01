@@ -3,8 +3,8 @@
 Extract ALL TruffleHog secret detections from the baseline snapshot and draw a
 reproducible random sample for ground-truth false-positive validation.
 
-This mirrors the methodology of the companion high-exposure paper (manual
-secret FP-validation) but runs over the *baseline* corpus snapshot (the reports
+This mirrors the methodology of the exposure-ranked study (manual secret
+FP-validation) but runs over the random-sample corpus snapshot (the reports
 SQLite) and uses an explicit fixed-seed `random.Random(seed).sample`
 over the full, materialised population (not reservoir sampling) so the sample is
 exactly reproducible from the seed alone.
@@ -24,7 +24,7 @@ REPRODUCIBILITY
               we have no live-verification signal; this is recorded explicitly and
               the validation is purely manual/heuristic ground truth.
 * Seed      : SEED = 20260522, sampler = random.Random(SEED).sample(population, n).
-* n         : N_SAMPLE = 1100 (uniform random, same size as the companion paper:
+* n         : N_SAMPLE = 1100 (uniform random, same size as the exposure-ranked study:
               95% CI, +-3% on a proportion; or the whole population if smaller).
 
 SECRET REDACTION
