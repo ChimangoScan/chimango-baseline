@@ -297,9 +297,7 @@ for name, c in by_cat:
 # =====================================================================
 # ============================  FIGURE  ===============================
 # =====================================================================
-fig = plt.figure(figsize=(6.9, 2.6))
-gs = fig.add_gridspec(2, 2, height_ratios=[1, 1.15])
-ax = [fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1]), fig.add_subplot(gs[1, :])]
+fig, ax = plt.subplots(1, 3, figsize=(9.6, 2.15), gridspec_kw={"width_ratios": [1.0, 1.05, 1.35]})
 
 # --- panel (a): scanner divergence (per-image,CVE pooled) ---
 labs = ["1 scanner", "2 scanners", "3 scanners"]
@@ -312,7 +310,7 @@ for bb, p in zip(b, vals):
 ax[0].set_ylabel("% of CVEs", labelpad=2)
 ax[0].set_title("(a) Vulnerability-scanner agreement")
 ax[0].set_ylim(0, max(vals) * 1.2)
-ax[0].tick_params(axis="x", labelsize=6.8)
+ax[0].tick_params(axis="x", labelsize=8.5)
 
 # --- panel (b): top OS distributions ---
 top_os = os_counter.most_common(5)
@@ -332,15 +330,15 @@ for rect, p in zip(bb, shares):
 ax[1].set_xlabel("% of images")
 ax[1].set_title("(b) Base distribution")
 ax[1].set_xlim(0, max(shares) * 1.18)
-ax[1].tick_params(axis="y", labelsize=6.5)
+ax[1].tick_params(axis="y", labelsize=8.0)
 
 # --- panel (c): secret FP categories ---
 # group: drop TP/CANDIDATE from the FP-composition view, keep the named FP buckets
 fp_buckets = [(n_, c_) for n_, c_ in by_cat if n_ not in ("TP", "CANDIDATE-credential")]
 # nicer short labels
 relabel = {
-    "package-hash": "Package hash", "example/placeholder": "Example/placeholder",
-    "binary/asset": "Binary/asset", "dependency-lock": "Dependency lock",
+    "package-hash": "Package hash", "example/placeholder": "Placeholder",
+    "binary/asset": "Binary/asset", "dependency-lock": "Dep. lock",
     "test-fixture": "Test fixture", "bare-hash": "Bare hash",
     "identifier/uuid": "Identifier",
 }
@@ -355,7 +353,7 @@ for rect, p in zip(bc, cvals):
 ax[2].set_xlabel("% of sampled detections")
 ax[2].set_title("(c) Secret false-positive types")
 ax[2].set_xlim(0, max(cvals) * 1.2)
-ax[2].tick_params(axis="y", labelsize=6.0)
+ax[2].tick_params(axis="y", labelsize=7.8)
 
 fig.tight_layout(w_pad=1.1)
 fig.savefig(f"{OUT}/fig_extra.pdf", bbox_inches="tight", pad_inches=0.03)
