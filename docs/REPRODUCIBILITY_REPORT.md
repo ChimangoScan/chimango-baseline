@@ -37,7 +37,8 @@ Numbers that re-verified exactly as published: N=4,800 / 2,879; 34.9% gone,
 96.8% prevalence; median 947 (mean 2,939, max 26,511); 9.9M findings; 82.4%
 raw secret rate; 5/1,100 secret TPs (FP 99.55%, Wilson 98.9–99.8); 70.5%
 single-tool / 11.1% all-three; Debian 38.4 / Alpine 32.8 / Ubuntu 18.1%;
-Dockle 99.7 / 89.0 / 97.4%; z-tests z=2.17 (p=0.03), z=1.46 (p=0.15),
+Dockle 99.4 (excl. the near-universal content-trust check CIS-DI-0005) / 89.0 /
+97.4%; z-tests z=2.17 (p=0.03), z=1.46 (p=0.15),
 z=1.21 (p=0.23); oldest CVE 1999; 0 official repositories.
 
 ## Known limitations and inconsistencies
