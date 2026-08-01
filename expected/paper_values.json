@@ -205,8 +205,8 @@
     "source": "Sec. 4.4"
   },
   "pct_dockle_misconf": {
-    "value": 99.7,
-    "source": "Sec. 4.4"
+    "value": 99.4,
+    "source": "Sec. 4.4 (excludes the near-universal content-trust check CIS-DI-0005)"
   },
   "pct_nonroot_missing": {
     "value": 89.0,

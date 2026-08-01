@@ -94,7 +94,7 @@ def main():
         "pct_alpine": round(100 * oc["Alpine"] / N, 1),
         "pct_ubuntu": round(100 * oc["Ubuntu"] / N, 1),
         "pct_distroless": round(100 * fe["n_os_unknown"] / N, 1),
-        "pct_dockle_misconf": round(100 * fe["n_img_misconf"] / N, 1),
+        "pct_dockle_misconf": round(100 * fe["n_img_misconf_strict"] / N, 1),
         "pct_nonroot_missing": round(100 * dockle["CIS-DI-0001"] / N, 1),
         "pct_healthcheck_missing": round(100 * dockle["CIS-DI-0006"] / N, 1),
         "pct_creds_env": round(100 * dockle["CIS-DI-0010"] / N, 1),
