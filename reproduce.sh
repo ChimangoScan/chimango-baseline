@@ -33,7 +33,11 @@ set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$HERE"
-PYTHON="${PYTHON:-python3}"
+if [ -z "${PYTHON:-}" ] && [ -x "$HERE/.venv/bin/python" ]; then
+    PYTHON="$HERE/.venv/bin/python"
+else
+    PYTHON="${PYTHON:-python3}"
+fi
 export BL_FIGS="${BL_FIGS:-$HERE/figures}"
 
 log() { printf '\n=== %s ===\n' "$*"; }
@@ -102,16 +106,29 @@ dataset() {
         log "Dataset already present and verified: $DB" >&2
         echo "$DB"; return 0
     fi
-    command -v zstd >/dev/null || { echo "zstd is required (apt install zstd)" >&2; exit 1; }
     local FREE_GB; FREE_GB=$(df -BG --output=avail "$DIR" | tail -1 | tr -dc 0-9)
     [ "$FREE_GB" -ge 11 ] || { echo "need ~11 GB free in $DIR (have ${FREE_GB} GB)" >&2; exit 1; }
     if [ ! -f "$ZST" ] || ! echo "$SHA_ZST  $ZST" | sha256sum -c --quiet -; then
         log "Downloading the reports database (226 MB)" >&2
-        curl -L --fail --retry 3 -o "$ZST" "$DATASET_URL"
+        "$PYTHON" - "$DATASET_URL" "$ZST" <<'PY'
+import shutil
+import sys
+import urllib.request
+
+request = urllib.request.Request(sys.argv[1], headers={"User-Agent": "chimango-baseline-artifact"})
+with urllib.request.urlopen(request) as response, open(sys.argv[2], "wb") as output:
+    shutil.copyfileobj(response, output, length=1024 * 1024)
+PY
         echo "$SHA_ZST  $ZST" | sha256sum -c - || { echo "checksum mismatch: $ZST" >&2; exit 1; }
     fi
     log "Decompressing to $DB (10.3 GB)" >&2
-    zstd -d -f "$ZST" -o "$DB"
+    "$PYTHON" - "$ZST" "$DB" <<'PY'
+import sys
+import zstandard
+
+with open(sys.argv[1], "rb") as source, open(sys.argv[2], "wb") as target:
+    zstandard.ZstdDecompressor().copy_stream(source, target)
+PY
     echo "$SHA_DB  $DB" | sha256sum -c - || { echo "checksum mismatch: $DB" >&2; exit 1; }
     log "Dataset ready: $DB" >&2
     echo "$DB"

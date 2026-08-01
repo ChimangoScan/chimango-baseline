@@ -44,7 +44,7 @@ Times were measured on the reference machine. Download time depends on the evalu
 
 # Dependencies
 
-The analysis uses Python's standard library plus the packages in `requirements.txt`. The tested figure environment uses Matplotlib 3.6.3 and NumPy 1.26.4. PyMongo is needed only to draw a different sample from a private crawl and is not used during artifact evaluation.
+The analysis uses Python's standard library plus the exact versions in `requirements.txt`: Matplotlib 3.8.4, NumPy 1.26.4, and zstandard 0.25.0. PyMongo is needed only to draw a different sample from a private crawl and is not part of artifact evaluation.
 
 The full input is the released `bl_snap.db.zst` dataset:
 
@@ -52,7 +52,7 @@ The full input is the released `bl_snap.db.zst` dataset:
 |---|---:|---:|---|
 | `bl_snap.db.zst` | 226 MB | 10.3 GB | Automatic in `reproduce.sh` |
 
-The script downloads the database from the repository's `dataset-v1` release, verifies the compressed and decompressed SHA-256 hashes, and stores it under `data/`. The evaluator does not need to download or move it manually. `curl` and `zstd` are required only for the full reproduction.
+The script downloads the database from the repository's `dataset-v1` release, verifies the compressed and decompressed SHA-256 hashes, and stores it under `data/`. Download and decompression use the isolated Python environment; the evaluator does not need system-wide packages or a manual dataset download.
 
 The original scanning campaign used Syft, Trivy, Grype, OSV-Scanner, Dockle, and TruffleHog through the separate ChimangoScan pipeline. Their image references used floating `latest` tags and their vulnerability databases were fetched at scan time. Consequently, the released reports are the record of the measured campaign; a new scan may resolve newer tools and vulnerability data.
 
@@ -65,11 +65,13 @@ The original scanning campaign used Syft, Trivy, Grype, OSV-Scanner, Dockle, and
 
 # Installation
 
-Clone the repository and install the analysis dependencies:
+Clone the repository, create an isolated virtual environment, and install the analysis dependencies into it:
 
 ```bash
-git clone https://github.com/ChimangoScan/chimango-baseline.git && cd chimango-baseline && sudo apt-get update && sudo apt-get install -y curl zstd python3-pip && python3 -m pip install -r requirements.txt
+git clone https://github.com/ChimangoScan/chimango-baseline.git && cd chimango-baseline && python3 -m venv .venv && .venv/bin/python -m pip install -r requirements.txt
 ```
+
+Nothing is installed globally. `reproduce.sh` automatically uses `.venv/bin/python` when the environment exists; activation is unnecessary.
 
 **Expected time:** approximately 30--90 s, depending on the package index and network.
 
