@@ -2,18 +2,21 @@
 
 This reproduces, on our **uniform-random** Docker Hub sample (the control group),
 the same concrete analyses the exposure-ranked paper reproduced
-(Sec. "Reproducing Prior Docker Hub Analyses", `tab:repro`). All
+(Sec. "Reproducing Prior Docker Hub Analyses", `tab:repro`). Throughout, the
+*exposure-ranked* sample is the companion study's corpus, ranked by how many pulls
+an image reaches directly or through images that reuse its layers; the two samples
+differ only in how repositories were selected. All
 comparisons are **directional, not like-for-like**: scanner, sample and elapsed
 time differ from every cited study. Per-image vulnerability counts are the raw
 finding count **merged** across the three vulnerability scanners (trivy, grype,
-osv) and **not deduplicated** — this inflates the mean, so medians are reported
+osv) and **not deduplicated**, which inflates the mean, so medians are reported
 alongside, and a deduplicated-distinct count is given as a robustness note.
 
 - **Sample**: uniform random draw, the reports SQLite, `reports` table.
 - **N images scanned**: **2,879** (one `latest` per repository reference).
 - **Namespace split**: **0 official**, **2,879 community**. A uniform random draw
   from Docker Hub's multi-million-repository namespace hits essentially no
-  `library/` images — Docker Hub has on the order of ~160 official repositories
+  `library/` images. Docker Hub has on the order of ~160 official repositories
   out of millions, so the probability of sampling one is negligible. This is
   itself a result (see Liu, below).
 - **Method**: one read-only streaming pass mirroring the exposure-ranked study's
@@ -75,7 +78,7 @@ alongside, and a deduplicated-distinct count is given as a robustness note.
 ### Liu et al. (2020)
 - Reported: ~30% of *official* and >64% of *community* images carry a
   high/critical vulnerability.
-- Ours: **community 96.4%** (2,776 / 2,879). **Official: not estimable — N=0**
+- Ours: **community 96.4%** (2,776 / 2,879). **Official: not estimable, N=0**
   official images in a uniform random sample.
 - **Interpretation.** The community prevalence is far above Liu's >64% six years
   on (*diverges upward*). The official comparison **cannot be reproduced on a
@@ -95,14 +98,14 @@ alongside, and a deduplicated-distinct count is given as a robustness note.
 - **Interpretation.** *Diverges* from Wist in the same direction the exposure-ranked study
   reported (76.9% OS / 21.7% lang): even a uniform random sample is
   dominated by OS-package vulnerability surface rather than language
-  dependencies. Wist's application-oriented sample surfaced language deps; both
+  dependencies. Wist's application-oriented sample surfaced language deps;
   both random and exposure-ranked corpora are OS-dominated. The random sample
   skews *even more* toward OS than the exposure-ranked sample.
 
 ### Mills et al. (2023)
 - Reported: some images still report CVEs as old as **1999**; staleness effect
   (older images carry more vulnerabilities).
-- Ours: oldest CVE identifier year is **1999** — reproduced exactly. **Staleness
+- Ours: oldest CVE identifier year is **1999**, reproduced exactly. **Staleness
   is NOT computable** from this snapshot: `target.meta` carries only
   `repository_namespace` / `repository_name` / `tag_name`, with no
   `last_updated` / registry timestamp, so vulns-vs-age cannot be regressed here.
@@ -121,7 +124,7 @@ alongside, and a deduplicated-distinct count is given as a robustness note.
 ### Dahlmanns et al. (2023)
 - Reported: **8.5%** of images contain a secret **after validation**; private
   keys are the dominant leaked-secret category.
-- Ours (**detector level only**, no manual validation — done by a separate
+- Ours (**detector level only**, no manual validation, done by a separate
   agent): TruffleHog flags an embedded secret in **82.4%** of images (2,372), and
   a *private-key* pattern in **45.5%** (1,309; shared rule: `privatekey`/
   `private` in title or `privatekey` in id). A broader `key`-substring rule gives
@@ -144,18 +147,18 @@ alongside, and a deduplicated-distinct count is given as a robustness note.
 All arrays are in `repro_baseline.json` under `figure_data`. For a compact
 3-panel figure mirroring the exposure-ranked study's `fig_repro_panel` + `fig_shu_panel`:
 
-- **(a) Official vs community high/critical prevalence** — `figure_data.
+- **(a) Official vs community high/critical prevalence**, in `figure_data.
   official_vs_community_prevalence`: groups `[Official, Community]`,
   `reported_liu = [30.0, 64.0]`, `ours_random = [n/a (N=0), 96.4]`,
   `n = [0, 2879]`. Plot the community bar; annotate "Official: N=0 in a uniform
   random sample (not estimable)".
-- **(b) Ecosystem split (OS vs language)** — `figure_data.ecosystem_split`:
+- **(b) Ecosystem split (OS vs language)**, in `figure_data.ecosystem_split`:
   OS **83.4%**, Language **15.7%**, Other 0.9% of 2,310,145 high/critical
   findings.
-- **(c) CVE-by-year histogram** — `figure_data.cve_by_year`: years 1999-2026,
+- **(c) CVE-by-year histogram**, in `figure_data.cve_by_year`: years 1999-2026,
   counts of distinct CVEs detected per identifier year (tail from 1999, mass in
   2020+; 72.8% are 2020 or later).
-- **(extra) Worst-severity buckets** — `figure_data.worst_severity`:
+- **(extra) Worst-severity buckets**, in `figure_data.worst_severity`:
   none 3.2 / low 0.0 / medium 0.3 / high 2.0 / **critical 94.4** (%).
 
 ## Headline takeaway
