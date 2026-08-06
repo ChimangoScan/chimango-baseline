@@ -55,7 +55,7 @@ All four SBSeg 2026 badges are requested:
 | GPU | Not required |
 | Minimal test | 15 MB peak RAM, negligible disk, 0.02 s measured |
 | Offline figure reproduction | 88 MB peak RAM, less than 10 MB output, 1.6 s measured |
-| Full database reproduction | 4 GB RAM recommended, 11 GB free disk. **Allow 30 to 60 min for a first run**, measured on a Ryzen 7 9700X (16 threads, 59 GB RAM) reading the freshly downloaded database from disk; the first stage alone took 426 s there. A re-run with the database already in the page cache takes 4 to 7 min |
+| Full database reproduction | 4 GB RAM recommended, 11 GB free disk. **Budget over an hour**: 30 to 60 min measured on a Ryzen 7 9700X (16 threads, 59 GB RAM), a fast desktop CPU, and longer on slower hardware, since the cost is dominated by the first read of the 10.3 GB database from disk. A re-run with the file already in the page cache takes 4 to 7 min |
 
 Times are stated with the machine that produced them, because they are hardware- and
 cache-dependent: the minimal test and the offline figure path were measured on the
@@ -122,14 +122,15 @@ OK: committed outputs match the paper (N=2879, 96.8% any-vuln, 0 official, 5/110
 
 # Experiments
 
-> # ⚠️ READ THIS BEFORE RUNNING ANY EXPERIMENT
->
-> **There is ONE claim and ONE command for it. Pick the path that fits the time and disk you have.**
->
-> - **`make test`**: under a second, no network, no dataset. Run this first to confirm the setup works.
-> - **`./reproduce.sh precomputed`**: about 2 seconds. Regenerates every figure and re-checks the headline numbers from the committed data alone, with no database and no download. Use this if you cannot spare 11 GB of disk.
-> - **`./reproduce.sh analyze`**: this is Claim #1, and the only command an evaluation needs. **Budget 30 to 60 minutes for the first run** on top of a **226 MB download that expands to 10.3 GB**, so make sure **11 GB of free disk** is available first. Most of that time is reading the database off disk for the first time, and the stages print as they finish, so a long silence inside a stage is expected rather than a hang.
-> - **Do NOT run `make scan`.** It re-executes the six scanners over thousands of public images, which is outside the evaluator path and should only ever run on disposable infrastructure, because it downloads and unpacks arbitrary third-party content.
+Pick the path that fits the time and disk you have:
+
+| Command | Cost | What it does |
+|---|---|---|
+| `make test` | under 1 s | confirms the setup works; no network, no dataset |
+| `./reproduce.sh precomputed` | ~2 s | regenerates every paper figure and checks all 66 paper values from the committed outputs. Not a reduced path: it asserts the same numbers as the full run |
+| `./reproduce.sh analyze` | **over an hour** | recomputes those same 66 values from the 10.3 GB database instead of reading them |
+
+`make scan` re-executes the six scanners over thousands of public images. It is outside the evaluator path and should only run on disposable infrastructure.
 
 ## Claim #1: Main paper results and figures
 
@@ -150,7 +151,7 @@ OK: committed outputs match the paper (N=2879, 96.8% any-vuln, 0 official, 5/110
 
 The command automatically downloads and verifies the dataset on first use. Later runs reuse the verified local database.
 
-**Expected time:** **30 to 60 min on a first run**, measured on a Ryzen 7 9700X (16 threads, 59 GB RAM), plus the 226 MB download and its decompression to 10.3 GB. The dominant cost is the first read of the database from disk: the first stage alone took 426 s there. Re-running once the file is in the page cache takes 4 to 7 min. Each stage prints when it completes, so silence within a stage is normal.
+**Expected time:** **over an hour.** 30 to 60 min measured on a Ryzen 7 9700X (16 threads, 59 GB RAM), plus the 226 MB download and its decompression to 10.3 GB; expect longer on slower hardware, since the dominant cost is the first read of the database from disk, and the first stage alone took 426 s there. Re-running once the file is in the page cache takes 4 to 7 min. Each stage prints only when it completes, so silence within a stage is normal and does not mean it hung.
 
 **Expected resources:** 4 GB RAM recommended and 11 GB free disk; no GPU or Docker.
 
