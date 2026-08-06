@@ -119,21 +119,23 @@ PY
 # 5. The figures are typeset in the paper's serif face. Without it matplotlib
 #    falls back to DejaVu Serif, whose wider glyphs crowd the labels. This does
 #    not affect any number, so it is a warning and not a failure.
-#    Capture the list first: piping into `grep -q` makes grep exit at the first
-#    match, fc-list dies of SIGPIPE, and `pipefail` would report the whole
-#    pipeline as failed, firing this warning on every machine.
-if command -v fc-list >/dev/null 2>&1; then
-    _families="$(fc-list : family 2>/dev/null || true)"
-    case "$_families" in
-        *"Liberation Serif"*|*"Nimbus Roman"*|*"Times New Roman"*) ;;
-        *)
-            say ""
-            say "NOTE: the paper's serif font is not installed, so the regenerated figures"
-            say "will differ typographically from the published ones (numbers unaffected)."
-            say "To match them exactly:"
-            pkg_hint "fonts-liberation" "liberation-serif-fonts" "ttf-liberation" "liberation-fonts"
-            ;;
-    esac
+#    Ask matplotlib, which is what actually resolves the font when the figures are
+#    drawn, instead of `fc-list`: fontconfig is not installed everywhere, and where
+#    it is missing the check would be skipped in silence and the evaluator would only
+#    find out at the end of a long run. This also keeps the warning here and the one
+#    in analysis/figstyle.py from ever disagreeing.
+if [ "$(.venv/bin/python - <<'PY'
+from matplotlib import font_manager
+want = ("Liberation Serif", "Nimbus Roman", "Times New Roman")
+have = {f.name for f in font_manager.fontManager.ttflist}
+print("ok" if any(n in have for n in want) else "missing")
+PY
+)" = "missing" ]; then
+    say ""
+    say "NOTE: the paper's serif font is not installed, so the regenerated figures"
+    say "will differ typographically from the published ones (numbers unaffected)."
+    say "To match them exactly:"
+    pkg_hint "fonts-liberation" "liberation-serif-fonts" "ttf-liberation" "liberation-fonts"
 fi
 
 say ""
