@@ -87,7 +87,9 @@ Clone the repository and run the bootstrap script. It selects a Python version t
 git clone https://github.com/ChimangoScan/chimango-baseline.git && cd chimango-baseline && ./scripts/bootstrap.sh
 ```
 
-If a required system package is missing, the script stops and prints the single command to run, for example `sudo apt install python3.12-venv`. Re-run the script afterwards.
+If the system Python is newer than 3.12, the script fetches a supported one with [uv](https://github.com/astral-sh/uv), downloading uv into the clone first when it is not already installed. That path needs no root and works on any distribution; nothing outside the clone is modified.
+
+If a system package is missing instead, the script stops and prints the single command to run for the distribution it detects (apt, dnf, pacman or zypper). Re-run the script afterwards.
 
 Nothing is installed globally. `reproduce.sh` automatically uses `.venv/bin/python` when the environment exists; activation is unnecessary.
 

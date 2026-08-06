@@ -19,6 +19,30 @@ SUPPORTED="3.12 3.11 3.10"
 
 say() { printf '%s\n' "$*"; }
 
+# uv installs itself into ~/.local/bin (or ~/.cargo/bin) and only edits the shell
+# rc files, so it is NOT on PATH in the shell that just installed it. Look in
+# those directories too, otherwise a reviewer who follows our own instructions
+# re-runs this script and is told again that uv is missing.
+find_uv() {
+    if command -v uv >/dev/null 2>&1; then command -v uv; return 0; fi
+    for c in "$HOME/.local/bin/uv" "$HOME/.cargo/bin/uv"; do
+        [ -x "$c" ] && { printf '%s\n' "$c"; return 0; }
+    done
+    return 1
+}
+
+# Package-manager hints differ per distribution; print the one that applies
+# instead of assuming Debian.
+pkg_hint() {  # $1 = debian pkgs, $2 = fedora, $3 = arch, $4 = suse
+    if   command -v apt-get >/dev/null 2>&1; then say "    sudo apt install $1"
+    elif command -v dnf     >/dev/null 2>&1; then say "    sudo dnf install $2"
+    elif command -v pacman  >/dev/null 2>&1; then say "    sudo pacman -S $3"
+    elif command -v zypper  >/dev/null 2>&1; then say "    sudo zypper install $4"
+    else
+        say "    (your package manager) $1"
+    fi
+}
+
 # 1. An interpreter whose version the pinned wheels cover.
 PY=""
 for v in $SUPPORTED; do
@@ -31,27 +55,34 @@ if [ -z "$PY" ] && command -v python3 >/dev/null 2>&1 &&
 fi
 
 # uv can fetch a matching interpreter without root and without a distribution
-# package, which is the only option left when the system Python is too new.
-if [ -z "$PY" ] && command -v uv >/dev/null 2>&1; then
-    say "==> System Python is out of range; fetching 3.12 with uv"
-    uv python install 3.12
-    PY="$(uv python find 3.12)"
-fi
-
+# package, which is the only option left when the system Python is too new. It
+# is installed here rather than only suggested, so this script needs one run and
+# not two, and it lands in the repository so nothing outside it is touched.
 if [ -z "$PY" ]; then
-    cur="$(python3 -V 2>&1 || echo 'not installed')"
-    say "No usable Python found. Need one of: $SUPPORTED (found: $cur)."
-    say ""
-    say "numpy 1.26.4 and matplotlib 3.8.4, the versions used for the paper,"
-    say "publish wheels only up to Python 3.12, so a newer interpreter cannot"
-    say "install them. Take either route and re-run this script:"
-    say ""
-    say "  no root needed, works on any distribution:"
-    say "    curl -LsSf https://astral.sh/uv/install.sh | sh"
-    say ""
-    say "  or, if your distribution still packages 3.12:"
-    say "    sudo apt install python3.12 python3.12-venv"
-    exit 1
+    UV="$(find_uv || true)"
+    if [ -z "$UV" ]; then
+        say "==> System Python is out of range and uv is not installed."
+        say "==> Fetching uv into $REPO/.uv (nothing outside this directory changes)"
+        if ! curl -LsSf https://astral.sh/uv/install.sh \
+             | env UV_INSTALL_DIR="$REPO/.uv" UV_NO_MODIFY_PATH=1 sh >/dev/null 2>&1; then
+            cur="$(python3 -V 2>&1 || echo 'not installed')"
+            say ""
+            say "Could not download uv (no network?). Need a Python in: $SUPPORTED"
+            say "(found: $cur). numpy 1.26.4 and matplotlib 3.8.4 publish wheels only"
+            say "up to 3.12, so a newer interpreter cannot install them. Either:"
+            say ""
+            say "  install uv by hand, then re-run this script:"
+            say "    curl -LsSf https://astral.sh/uv/install.sh | sh"
+            say ""
+            say "  or install a supported Python from your distribution:"
+            pkg_hint "python3.12 python3.12-venv" "python3.12" "python312" "python312"
+            exit 1
+        fi
+        UV="$REPO/.uv/uv"
+    fi
+    say "==> System Python is out of range; fetching 3.12 with uv"
+    "$UV" python install 3.12
+    PY="$("$UV" python find 3.12)"
 fi
 
 # 2. That interpreter must be able to build a virtual environment. On Debian and
@@ -60,7 +91,7 @@ if ! "$PY" -c 'import ensurepip' >/dev/null 2>&1; then
     say "$PY is installed but cannot create virtual environments (no ensurepip)."
     say "Install the matching venv package and re-run this script:"
     say ""
-    say "    sudo apt install ${PY}-venv"
+    pkg_hint "${PY}-venv" "${PY}" "python" "${PY}"
     exit 1
 fi
 
@@ -88,13 +119,21 @@ PY
 # 5. The figures are typeset in the paper's serif face. Without it matplotlib
 #    falls back to DejaVu Serif, whose wider glyphs crowd the labels. This does
 #    not affect any number, so it is a warning and not a failure.
-if command -v fc-list >/dev/null 2>&1 &&
-   ! fc-list : family 2>/dev/null | grep -qiE "Liberation Serif|Nimbus Roman|Times New Roman"; then
-    say ""
-    say "NOTE: the paper's serif font is not installed, so the regenerated figures"
-    say "will differ typographically from the published ones (numbers unaffected)."
-    say "To match them exactly:"
-    say "    sudo apt install fonts-liberation"
+#    Capture the list first: piping into `grep -q` makes grep exit at the first
+#    match, fc-list dies of SIGPIPE, and `pipefail` would report the whole
+#    pipeline as failed, firing this warning on every machine.
+if command -v fc-list >/dev/null 2>&1; then
+    _families="$(fc-list : family 2>/dev/null || true)"
+    case "$_families" in
+        *"Liberation Serif"*|*"Nimbus Roman"*|*"Times New Roman"*) ;;
+        *)
+            say ""
+            say "NOTE: the paper's serif font is not installed, so the regenerated figures"
+            say "will differ typographically from the published ones (numbers unaffected)."
+            say "To match them exactly:"
+            pkg_hint "fonts-liberation" "liberation-serif-fonts" "ttf-liberation" "liberation-fonts"
+            ;;
+    esac
 fi
 
 say ""
