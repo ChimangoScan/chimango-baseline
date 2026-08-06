@@ -28,7 +28,7 @@
     "value": 60.0,
     "source": "Sec. 4.1 Reachability"
   },
-  "pct_gone": {
+  "pct_no_latest": {
     "value": 34.9,
     "source": "Sec. 4.1 (repositories without latest manifest)"
   },

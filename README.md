@@ -127,7 +127,7 @@ OK: committed outputs match the paper (N=2879, 96.8% any-vuln, 0 official, 5/110
 
 ## Claim #1: Main paper results and figures
 
-**Description.** This experiment reproduces the paper's data-backed results from the released reports database, and regenerates the four paper figures. It checks:
+**Description.** This experiment reproduces the paper's data-backed results from the released reports database, and regenerates the paper's three figures. It checks:
 
 - the uniform draw and the reachability outcomes of the 4,800 repositories;
 - vulnerability prevalence and per-image counts;
@@ -157,7 +157,6 @@ verify: 66 pass, 0 fail (skips listed in expected/_skip_note)
 The command writes the regenerated figures to:
 
 - `figures/fig_panels3.pdf`: vulnerabilities per image, severity, and scanner completion;
-- `figures/fig_reach.pdf`: outcomes of the 4,800-repository random draw;
 - `figures/fig_repro.pdf`: prior analyses repeated on the random sample;
 - `figures/fig_extra.pdf`: scanner agreement, base distribution, and secret-label categories.
 

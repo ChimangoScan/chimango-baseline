@@ -9,7 +9,7 @@ The per-image scanner reports live in a large SQLite database (reports table,
 10.3 GB, published as a GitHub release asset). The figure scripts (make_figs.py,
 analyze_extra.py) need a handful of aggregate arrays from it (a per-image
 vulnerability-count vector, severity totals, scanner-coverage counts, the
-reachability breakdown from the jobs table, a scanner-agreement Venn over
+the reachability counts from the jobs table, a scanner-agreement Venn over
 (image, CVE) pairs, and the base-OS distribution). This one-off pass distills
 all of those into a small JSON that is shipped with the artifact, so the
 figures regenerate from JSON alone in the precomputed reproduction mode.
@@ -178,11 +178,11 @@ def main():
             for d in dids:
                 dockle_cnt[d] += 1
 
-    # --- reachability breakdown (Fig B), from the jobs table ---
+    # --- reachability breakdown, from the jobs table ---
     # A job that started scanning but never produced a report (status
     # 'failed': stuck scanners, save/timeout/disk errors) is did-not-finish;
     # only never-pulled jobs (status 'skipped') are classified by error text.
-    reach = {"scanned": N, "gone": 0, "arch": 0, "auth": 0,
+    reach = {"scanned": N, "no_latest": 0, "arch": 0, "auth": 0,
              "format": 0, "dnf": 0}
     for (st, e) in con.execute(
             "SELECT status, error FROM jobs "
@@ -200,7 +200,7 @@ def main():
                                    "does not exist", "name unknown", "no such",
                                    "not known", "failed to resolve",
                                    "manifest for")):
-            reach["gone"] += 1
+            reach["no_latest"] += 1
         else:
             reach["format"] += 1
     con.close()
@@ -230,6 +230,9 @@ def main():
             "high_pct": round(100 * high / N, 1),
             "secret_pct": round(100 * secret / N, 1),
         },
+        # Kept under its original key so the committed figdata stays readable by
+        # older checkouts. There is no reachability FIGURE: the paper states these
+        # outcomes in the text, so the counts feed verify_values.py only.
         "fig_reach": {"reach": reach},
         "fig_extra": {
             "venn_subsets": venn_subsets, "n_img_trio_all_ok": n_trio,

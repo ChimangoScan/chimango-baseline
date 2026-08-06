@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Compact, publication-style figures for the random-sample baseline short paper.
-Two original figures plus a reproduction panel: a per-image overview (3 panels),
-a reachability breakdown that is unique to the random sample, and a reproduction
-of prior analyses on the random sample.
+One original figure plus a reproduction panel: a per-image overview (3 panels)
+and a reproduction of prior analyses on the random sample. The reachability
+breakdown is reported as numbers rather than drawn: the paper states it in the
+text, so only its counts are computed here and checked by verify_values.py.
 
 Data sources, in order of preference:
   * If the reports database exists (BL_DB points at an existing file), the
-    per-image and reachability panels are computed from it in one streaming pass
-    (database mode).
+    per-image panels and the reachability counts are computed from it in one
+    streaming pass (database mode).
   * Otherwise the shipped precomputed arrays (analysis/figdata_baseline.json,
     produced by analysis/precompute_figdata.py) are used, so every figure
     regenerates with NO database and no network (precomputed mode, the default).
@@ -63,13 +64,13 @@ def from_db():
                 isec = True
         vpi.append(v); anyv += v > 0; crit += ic; high += ih; secret += isec
     N = n
-    reach = {"scanned": N, "gone": 0, "arch": 0, "auth": 0, "format": 0, "dnf": 0}
+    reach = {"scanned": N, "no_latest": 0, "arch": 0, "auth": 0, "format": 0, "dnf": 0}
     for (st, e) in c.execute("SELECT status, error FROM jobs WHERE status IN ('skipped','failed')"):
         el = (e or "").lower()
         if st == "failed": reach["dnf"] += 1
         elif "no matching manifest" in el or "platform" in el or "no child with platform" in el: reach["arch"] += 1
         elif any(s in el for s in ("denied", "unauthorized", "forbidden", "authentication required")): reach["auth"] += 1
-        elif any(s in el for s in ("not found", "manifest unknown", "does not exist", "name unknown", "no such", "not known", "failed to resolve", "manifest for")): reach["gone"] += 1
+        elif any(s in el for s in ("not found", "manifest unknown", "does not exist", "name unknown", "no such", "not known", "failed to resolve", "manifest for")): reach["no_latest"] += 1
         else: reach["format"] += 1
     c.close()
     return (N, vpi, sev, cov, reach,
@@ -118,24 +119,6 @@ ax[2].set_ylabel("% of images"); ax[2].set_xlabel("scanners completed")
 ax[2].set_title("(c) Scanner completion"); ax[2].set_ylim(0, 100)
 fig.tight_layout(w_pad=1.1); save(fig, "fig_panels3")
 
-# === Fig B: reachability of a uniform random draw (unique to this study) ===
-# Outcomes of every drawn repository (infra disk failures re-queued, excluded).
-order = [("Scanned", "scanned", GREEN), ("No latest", "gone", RED),
-         ("Unpullable", "format", "#8073ac"), ("Denied", "auth", "#fdae61"),
-         ("Other arch.", "arch", "#80b1d3"), ("DNF", "dnf", "#999999")]
-tot = sum(reach[k] for _, k, _ in order)
-fig, ax = plt.subplots(figsize=(6.9, 0.95))
-left = 0.0
-for label, key, col in order:
-    w = 100*reach[key]/tot
-    ax.barh(0, w, left=left, color=col, edgecolor="white", linewidth=0.6)
-    if w > 3:
-        ax.text(left+w/2, 0, f"{label}\n{w:.1f}%", ha="center", va="center",
-                fontsize=6.4, color="white" if key in ("scanned", "gone") else "#222")
-    left += w
-ax.set_xlim(0, 100); ax.set_ylim(-0.5, 0.5); ax.axis("off")
-ax.set_title("Outcome of a uniform random draw of the Docker Hub namespace", fontsize=8.5, pad=3)
-save(fig, "fig_reach")
 
 # === Fig C: reproduction of prior analyses on the random sample (5 panels, 2 rows) ===
 R = json.load(open(os.path.join(_HERE, "repro_baseline.json"))); FD = R["figure_data"]
@@ -184,5 +167,6 @@ save(fig, "fig_repro")
 
 print(f"N={N} anyvuln={anyv_pct:.1f}% crit={crit_pct:.1f}% high={high_pct:.1f}% "
       f"secret={secret_pct:.1f}% median={med}")
-print("reach:", reach, "| scanned%=", round(100*reach['scanned']/sum(reach[k] for _,k,_ in order), 1),
-      "gone%=", round(100*reach['gone']/sum(reach[k] for _,k,_ in order), 1))
+_drawn = sum(reach.values())
+print("reach:", reach, "| scanned%=", round(100*reach['scanned']/_drawn, 1),
+      "no-latest%=", round(100*reach['no_latest']/_drawn, 1))
