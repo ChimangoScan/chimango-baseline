@@ -46,7 +46,7 @@ def from_db():
     sev = {"critical": 0, "high": 0, "medium": 0, "low": 0}
     cov = {}
     n = anyv = crit = high = secret = 0
-    c = sqlite3.connect(f"file:{DB}?immutable=1", uri=True)
+    c = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
     for (rj,) in c.execute("SELECT report_json FROM reports"):
         r = json.loads(rj); fs = r.get("findings") or []; n += 1
         ok = len([i for i in (r.get("invocations") or []) if i.get("status") == "ok"])

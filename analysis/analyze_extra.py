@@ -54,7 +54,7 @@ def family_of(distro_tag):
 
 def from_db():
     """One streaming pass over the reports table (database mode)."""
-    con = sqlite3.connect(f"file:{DB}?immutable=1", uri=True)
+    con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
     N = 0
     overall_sets = {s: set() for s in VULN_SCANNERS}   # distinct CVEs overall, per scanner
     img_share = Counter()        # over (image, cve): how many scanners reported it -> count

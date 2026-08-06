@@ -33,7 +33,7 @@ GONE = ("not found", "manifest unknown", "does not exist", "name unknown",
 
 
 def unresolved_repos():
-    con = sqlite3.connect("file:%s?immutable=1" % DB, uri=True)
+    con = sqlite3.connect("file:%s?mode=ro" % DB, uri=True)
     repos = []
     for (tj, err) in con.execute(
             "SELECT target_json, error FROM jobs WHERE status='skipped'"):

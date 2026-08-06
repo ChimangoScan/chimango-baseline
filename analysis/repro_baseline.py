@@ -113,6 +113,7 @@ def main():
 
     # ---- accumulators ----
     n_reports = 0
+    n_malformed = 0
     n_official = 0
     n_community = 0
 
@@ -165,7 +166,14 @@ def main():
 
         try:
             j = json.loads(rj)
-        except Exception:
+        except Exception as exc:
+            # Never skip a row silently: a report that will not parse means the
+            # image is counted in n_reports but contributes no findings, which
+            # would quietly depress every rate below.
+            n_malformed += 1
+            if n_malformed <= 3:
+                print("WARNING: unparseable report_json for %s: %s"
+                      % (image, exc), file=sys.stderr)
             continue
 
         # last_updated probe (target.meta or finding-level) -- first row only
@@ -346,6 +354,7 @@ def main():
             "sample": "uniform-random baseline (control group)",
             "db": DB,
             "n_reports": n_reports,
+            "n_malformed_reports": n_malformed,
             "n_official": n_official,
             "n_community": n_community,
             "elapsed_s": round(time.time() - t0, 1),
@@ -512,8 +521,12 @@ def main():
 
     with open(os.path.join(OUTDIR, "repro_baseline.json"), "w") as fh:
         json.dump(out, fh, indent=2)
-    sys.stderr.write("wrote repro_baseline.json (%d reports, %.1fs)\n"
-                     % (n_reports, time.time() - t0))
+    sys.stderr.write("wrote repro_baseline.json (%d reports%s, %.1fs)\n"
+                     % (n_reports,
+                        "" if not n_malformed
+                        else ", %d UNPARSEABLE and excluded from every rate"
+                             % n_malformed,
+                        time.time() - t0))
     return out
 
 

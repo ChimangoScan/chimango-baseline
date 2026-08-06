@@ -61,7 +61,7 @@ def family_of(distro_tag):
 
 
 def main():
-    con = sqlite3.connect("file:%s?immutable=1" % DB, uri=True)
+    con = sqlite3.connect("file:%s?mode=ro" % DB, uri=True)
 
     # --- per-image arrays (Fig A) ---
     vpi = []

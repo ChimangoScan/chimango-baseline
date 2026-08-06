@@ -149,7 +149,7 @@ def fp_reason(detector, value, loc):
 
 
 def build_sample():
-    con = sqlite3.connect(DB)
+    con = sqlite3.connect("file:%s?mode=ro" % DB, uri=True)
     pop = []
     for (img, rj) in con.execute("SELECT image, report_json FROM reports"):
         try:

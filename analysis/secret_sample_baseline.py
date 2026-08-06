@@ -96,7 +96,7 @@ def locpat(loc: str) -> str:
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    con = sqlite3.connect(DB)
+    con = sqlite3.connect("file:%s?mode=ro" % DB, uri=True)
     population = []
     det = Counter()
     locp = Counter()
