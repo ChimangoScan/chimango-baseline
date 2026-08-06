@@ -25,21 +25,33 @@ for v in $SUPPORTED; do
     if command -v "python$v" >/dev/null 2>&1; then PY="python$v"; break; fi
 done
 
+if [ -z "$PY" ] && command -v python3 >/dev/null 2>&1 &&
+   python3 -c 'import sys; raise SystemExit(0 if (3,10) <= sys.version_info[:2] <= (3,12) else 1)' 2>/dev/null; then
+    PY=python3
+fi
+
+# uv can fetch a matching interpreter without root and without a distribution
+# package, which is the only option left when the system Python is too new.
+if [ -z "$PY" ] && command -v uv >/dev/null 2>&1; then
+    say "==> System Python is out of range; fetching 3.12 with uv"
+    uv python install 3.12
+    PY="$(uv python find 3.12)"
+fi
+
 if [ -z "$PY" ]; then
-    if command -v python3 >/dev/null 2>&1 &&
-       python3 -c 'import sys; raise SystemExit(0 if (3,10) <= sys.version_info[:2] <= (3,12) else 1)'; then
-        PY=python3
-    else
-        cur="$(python3 -V 2>&1 || echo 'not installed')"
-        say "No usable Python found. Need one of: $SUPPORTED (found: $cur)."
-        say ""
-        say "numpy 1.26.4 and matplotlib 3.8.4, the versions used for the paper,"
-        say "publish wheels only up to Python 3.12, so a newer interpreter cannot"
-        say "install them. Install a supported one and re-run this script:"
-        say ""
-        say "    sudo apt install python3.12 python3.12-venv"
-        exit 1
-    fi
+    cur="$(python3 -V 2>&1 || echo 'not installed')"
+    say "No usable Python found. Need one of: $SUPPORTED (found: $cur)."
+    say ""
+    say "numpy 1.26.4 and matplotlib 3.8.4, the versions used for the paper,"
+    say "publish wheels only up to Python 3.12, so a newer interpreter cannot"
+    say "install them. Take either route and re-run this script:"
+    say ""
+    say "  no root needed, works on any distribution:"
+    say "    curl -LsSf https://astral.sh/uv/install.sh | sh"
+    say ""
+    say "  or, if your distribution still packages 3.12:"
+    say "    sudo apt install python3.12 python3.12-venv"
+    exit 1
 fi
 
 # 2. That interpreter must be able to build a virtual environment. On Debian and
