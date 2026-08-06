@@ -150,6 +150,25 @@ analyze() {
     fi
     [ -f "$DB" ] || { echo "reports database not found: $DB" >&2; exit 1; }
 
+    # Re-verify the database against its published checksum immediately before reading it,
+    # even when it was just decompressed. The check inside dataset() runs while the freshly
+    # written file is still in the page cache, so it can pass on a machine whose storage
+    # later returns different bytes; that showed up once as a JSONDecodeError deep inside the
+    # analysis, which tells the evaluator nothing. ~40 s against a 4-7 min analysis.
+    if [ "$DB" = "data/bl_snap.db" ] || [ "$(basename "$DB")" = "bl_snap.db" ]; then
+        log "Verifying $DB against the published checksum"
+        if ! echo "$SHA_DB  $DB" | sha256sum -c --quiet -; then
+            echo "" >&2
+            echo "ERROR: $DB does not match the published SHA-256." >&2
+            echo "The file on disk is not the released dataset: the download or the" >&2
+            echo "decompression produced different bytes, or the storage is returning" >&2
+            echo "them corrupted. Delete it and run this command again:" >&2
+            echo "    rm -f $DB && ./reproduce.sh analyze" >&2
+            echo "If it fails a second time, check the disk before trusting any result." >&2
+            exit 1
+        fi
+    fi
+
     log "1/2  Recompute analysis outputs from $DB"
     BL_DB="$DB" BL_OUT=analysis "$PYTHON" analysis/repro_baseline.py
     BL_DB="$DB" BL_OUT=analysis "$PYTHON" analysis/precompute_figdata.py
