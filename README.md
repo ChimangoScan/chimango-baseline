@@ -115,6 +115,15 @@ OK: committed outputs match the paper (N=2879, 96.8% any-vuln, 0 official, 5/110
 
 # Experiments
 
+> # ⚠️ READ THIS BEFORE RUNNING ANY EXPERIMENT
+>
+> **There is ONE claim and ONE command for it. Pick the path that fits the time and disk you have.**
+>
+> - **`make test`**: under a second, no network, no dataset. Run this first to confirm the setup works.
+> - **`./reproduce.sh precomputed`**: about 2 seconds. Regenerates every figure and re-checks the headline numbers from the committed data alone, with no database and no download. Use this if you cannot spare 11 GB of disk.
+> - **`./reproduce.sh analyze`**: this is Claim #1, and the only command an evaluation needs. About **4 to 7 minutes** after the dataset is available, plus a **226 MB download that expands to 10.3 GB**, so make sure **11 GB of free disk** is available first.
+> - **Do NOT run `make scan`.** It re-executes the six scanners over thousands of public images, which is outside the evaluator path and should only ever run on disposable infrastructure, because it downloads and unpacks arbitrary third-party content.
+
 ## Claim #1: Main paper results and figures
 
 **Description.** This experiment reproduces the paper's data-backed results from the released reports database, and regenerates the four paper figures. It checks:
