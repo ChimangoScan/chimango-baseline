@@ -55,9 +55,12 @@ All four SBSeg 2026 badges are requested:
 | GPU | Not required |
 | Minimal test | 15 MB peak RAM, negligible disk, 0.02 s measured |
 | Offline figure reproduction | 88 MB peak RAM, less than 10 MB output, 1.6 s measured |
-| Full database reproduction | 4 GB RAM recommended, 11 GB free disk, approximately 4 to 7 min after download |
+| Full database reproduction | 4 GB RAM recommended, 11 GB free disk. **Allow 30 to 60 min for a first run**, measured on a Ryzen 7 9700X (16 threads, 59 GB RAM) reading the freshly downloaded database from disk; the first stage alone took 426 s there. A re-run with the database already in the page cache takes 4 to 7 min |
 
-Times were measured on the reference machine. Download time depends on the evaluator's network connection.
+Times are stated with the machine that produced them, because they are hardware- and
+cache-dependent: the minimal test and the offline figure path were measured on the
+reference machine above, the full reproduction on the Ryzen 7 9700X noted in its row.
+Download time depends on the evaluator's network connection.
 
 # Dependencies
 
@@ -125,7 +128,7 @@ OK: committed outputs match the paper (N=2879, 96.8% any-vuln, 0 official, 5/110
 >
 > - **`make test`**: under a second, no network, no dataset. Run this first to confirm the setup works.
 > - **`./reproduce.sh precomputed`**: about 2 seconds. Regenerates every figure and re-checks the headline numbers from the committed data alone, with no database and no download. Use this if you cannot spare 11 GB of disk.
-> - **`./reproduce.sh analyze`**: this is Claim #1, and the only command an evaluation needs. About **4 to 7 minutes** after the dataset is available, plus a **226 MB download that expands to 10.3 GB**, so make sure **11 GB of free disk** is available first.
+> - **`./reproduce.sh analyze`**: this is Claim #1, and the only command an evaluation needs. **Budget 30 to 60 minutes for the first run** on top of a **226 MB download that expands to 10.3 GB**, so make sure **11 GB of free disk** is available first. Most of that time is reading the database off disk for the first time, and the stages print as they finish, so a long silence inside a stage is expected rather than a hang.
 > - **Do NOT run `make scan`.** It re-executes the six scanners over thousands of public images, which is outside the evaluator path and should only ever run on disposable infrastructure, because it downloads and unpacks arbitrary third-party content.
 
 ## Claim #1: Main paper results and figures
@@ -147,7 +150,7 @@ OK: committed outputs match the paper (N=2879, 96.8% any-vuln, 0 official, 5/110
 
 The command automatically downloads and verifies the dataset on first use. Later runs reuse the verified local database.
 
-**Expected time:** approximately 4 to 7 min after the dataset is available, plus the first 226 MB download and decompression.
+**Expected time:** **30 to 60 min on a first run**, measured on a Ryzen 7 9700X (16 threads, 59 GB RAM), plus the 226 MB download and its decompression to 10.3 GB. The dominant cost is the first read of the database from disk: the first stage alone took 426 s there. Re-running once the file is in the page cache takes 4 to 7 min. Each stage prints when it completes, so silence within a stage is normal.
 
 **Expected resources:** 4 GB RAM recommended and 11 GB free disk; no GPU or Docker.
 
