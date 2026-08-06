@@ -48,7 +48,8 @@ All four SBSeg 2026 badges are requested:
 |---|---|
 | Operating system | Linux x86-64; tested on Ubuntu |
 | Reference machine | AMD Ryzen 5 8600G, 12 logical CPUs, 32 GB RAM |
-| Python | 3.12 used for the study; 3.10 or newer supported |
+| Python | 3.10 to 3.12; 3.12.3 used for the study. NumPy 1.26.4 and Matplotlib 3.8.4 publish no wheels for 3.13 or newer, so a newer interpreter cannot install them |
+| System package | `python3-venv` (Debian and Ubuntu package it separately from `python3`) |
 | GPU | Not required |
 | Minimal test | 15 MB peak RAM, negligible disk, 0.02 s measured |
 | Offline figure reproduction | 88 MB peak RAM, less than 10 MB output, 1.6 s measured |
@@ -79,15 +80,17 @@ The original scanning campaign used six tools through the separate ChimangoScan 
 
 # Installation
 
-Clone the repository, create an isolated virtual environment, and install the analysis dependencies into it:
+Clone the repository and run the bootstrap script. It selects a Python version the pinned dependencies support, creates the isolated environment, installs into it, and verifies the imports:
 
 ```bash
-git clone https://github.com/ChimangoScan/chimango-baseline.git && cd chimango-baseline && python3 -m venv .venv && .venv/bin/python -m pip install -r requirements.txt
+git clone https://github.com/ChimangoScan/chimango-baseline.git && cd chimango-baseline && ./scripts/bootstrap.sh
 ```
+
+If a required system package is missing, the script stops and prints the single command to run, for example `sudo apt install python3.12-venv`. Re-run the script afterwards.
 
 Nothing is installed globally. `reproduce.sh` automatically uses `.venv/bin/python` when the environment exists; activation is unnecessary.
 
-**Expected time:** approximately 30 to 90 s, depending on the package index and network.
+**Expected time:** approximately 30 to 90 s, depending on the package index and network; 8 s measured on the reference machine with a warm package cache.
 
 **Expected resources:** less than 500 MB RAM and 500 MB disk.
 
