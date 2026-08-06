@@ -1,5 +1,7 @@
 # Chimango Baseline: Uniform Random-Sample Security Measurement of Docker Hub Images
 
+[![artifact](https://github.com/ChimangoScan/chimango-baseline/actions/workflows/artifact.yml/badge.svg)](https://github.com/ChimangoScan/chimango-baseline/actions/workflows/artifact.yml)
+
 Artifact for the SBSeg 2026 paper *A Uniform Random-Sample Security Measurement of Docker Hub Images*. It measures the security posture of a typical Docker Hub image, drawing repositories uniformly at random instead of by popularity, and scanning each one with six open-source tools. **2,879** images were analyzed and **94.4%** carry a vulnerability the scanners rate critical, so the high rates reported by earlier studies are not an effect of looking only at popular images. Hand-labeling 1,100 secret detections found **99.5%** of them to be false positives, which is why the paper reports a validated rate rather than the detector's raw output.
 
 > **Paper:** *A Uniform Random-Sample Security Measurement of Docker Hub Images*, SBSeg 2026 Main Track. Artifact evaluation follows the official [submission](https://doc-artefatos.github.io/sbseg2026/subinstrucoes.html) and [review](https://doc-artefatos.github.io/sbseg2026/revinstrucoes.html) instructions.
