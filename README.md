@@ -50,6 +50,7 @@ All four SBSeg 2026 badges are requested:
 | Reference machine | AMD Ryzen 5 8600G, 12 logical CPUs, 32 GB RAM |
 | Python | 3.10 to 3.12; 3.12.3 used for the study. NumPy 1.26.4 and Matplotlib 3.8.4 publish no wheels for 3.13 or newer, so a newer interpreter cannot install them |
 | System package | `python3-venv` (Debian and Ubuntu package it separately from `python3`) |
+| Fonts | `fonts-liberation`, to typeset the figures as published. Without it matplotlib falls back to DejaVu Serif and the labels render wider; every number is unaffected |
 | GPU | Not required |
 | Minimal test | 15 MB peak RAM, negligible disk, 0.02 s measured |
 | Offline figure reproduction | 88 MB peak RAM, less than 10 MB output, 1.6 s measured |

@@ -85,6 +85,18 @@ print(f"    matplotlib {matplotlib.__version__}, numpy {numpy.__version__}, "
       f"zstandard {zstandard.__version__}, sqlite3 {sqlite3.sqlite_version}")
 PY
 
+# 5. The figures are typeset in the paper's serif face. Without it matplotlib
+#    falls back to DejaVu Serif, whose wider glyphs crowd the labels. This does
+#    not affect any number, so it is a warning and not a failure.
+if command -v fc-list >/dev/null 2>&1 &&
+   ! fc-list : family 2>/dev/null | grep -qiE "Liberation Serif|Nimbus Roman|Times New Roman"; then
+    say ""
+    say "NOTE: the paper's serif font is not installed, so the regenerated figures"
+    say "will differ typographically from the published ones (numbers unaffected)."
+    say "To match them exactly:"
+    say "    sudo apt install fonts-liberation"
+fi
+
 say ""
 say "Ready. Next:"
 say "    make test              # offline check, no dataset, under a second"
