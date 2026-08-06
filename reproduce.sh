@@ -42,6 +42,14 @@ export BL_FIGS="${BL_FIGS:-$HERE/figures}"
 
 log() { printf '\n=== %s ===\n' "$*"; }
 
+# Lists the figures THIS run produced, given a timestamp taken just before the
+# generators ran. Listing the whole folder instead would report a PDF left behind by
+# an older version of the artifact as if it had just been regenerated, which is how a
+# figure the paper no longer contains kept showing up in the output.
+figs_written() {
+    find "$BL_FIGS" -maxdepth 1 -name '*.pdf' -newermt "$1" | sort
+}
+
 usage() {
     sed -n "2,31p" "$0" | sed 's/^# \{0,1\}//'
     exit "${1:-0}"
@@ -71,15 +79,16 @@ print("OK: random_sample.jsonl=4800 rows; repro N=2879, 96.8%% any-vuln, "
       "0 official; secret TPs=5/1100; figdata N=2879")
 PY
 
-    log "2/3  Regenerate the figures from the precomputed data"
+    log "2/4  Regenerate the figures from the precomputed data"
     # With no BL_DB pointing at an existing file, both scripts read the shipped
     # analysis/figdata_baseline.json and analysis/repro_baseline.json.
     unset BL_DB || true
+    local since; since=$(date -d '1 second ago' +%Y-%m-%dT%H:%M:%S)
     "$PYTHON" analysis/make_figs.py
     "$PYTHON" analysis/analyze_extra.py
 
     log "3/4  Figures written"
-    ls -1 "$BL_FIGS"/*.pdf
+    figs_written "$since"
 
     log "4/4  Verify the paper's numbers against the committed outputs"
     "$PYTHON" analysis/verify_values.py
@@ -174,9 +183,10 @@ analyze() {
     BL_DB="$DB" BL_OUT=analysis "$PYTHON" analysis/precompute_figdata.py
     BL_DB="$DB" BL_OUT=analysis "$PYTHON" analysis/stats_baseline.py
     log "2/2  Regenerate figures from $DB and verify the paper values"
+    local since; since=$(date -d '1 second ago' +%Y-%m-%dT%H:%M:%S)
     BL_DB="$DB" "$PYTHON" analysis/make_figs.py
     BL_DB="$DB" "$PYTHON" analysis/analyze_extra.py
-    ls -1 "$BL_FIGS"/*.pdf
+    figs_written "$since"
     "$PYTHON" analysis/verify_values.py
 }
 
