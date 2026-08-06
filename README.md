@@ -30,6 +30,7 @@ Artifact for the SBSeg 2026 paper *A Uniform Random-Sample Security Measurement 
 | [Minimal test](#minimal-test) | Fast offline functionality check |
 | [Experiments](#experiments) | One-command reproduction of the paper results |
 | [LICENSE](#license) | Artifact license |
+| [How to cite](#how-to-cite) | Paper reference and machine-readable `CITATION.cff` |
 
 The repository is organized as follows: `analysis/` contains the analyses, committed numeric outputs, manual labels, and figure generators; `data/` contains the canonical 4,800-repository draw; `expected/` maps paper claims to expected values; `docs/` records methodological caveats; and `reproduce.sh` is the single reproduction entry point.
 
@@ -172,3 +173,22 @@ The principal reproduced values are **2,879/4,800 scanned (60.0%)**, **94.4% wit
 # LICENSE
 
 This artifact is released under the [MIT License](LICENSE). Scanned third-party images and their contents remain the property of their respective owners.
+
+## How to cite
+
+Cite the paper, not the repository:
+
+> Kapelinski, C. and Kreutz, D. (2026). A Uniform Random-Sample Security Measurement of Docker Hub Images. In *Anais do XXVII Simpósio Brasileiro de Segurança da Informação e de Sistemas Computacionais (SBSeg 2026)*. Sociedade Brasileira de Computação.
+
+```bibtex
+@inproceedings{kapelinski2026chimangobase,
+  author    = {Kapelinski, Cristhian and Kreutz, Diego},
+  title     = {A Uniform Random-Sample Security Measurement of Docker Hub Images},
+  booktitle = {Anais do XXVII Simpósio Brasileiro de Segurança da Informação e de Sistemas Computacionais (SBSeg 2026)},
+  year      = {2026},
+  publisher = {Sociedade Brasileira de Computação},
+}
+```
+
+[`CITATION.cff`](CITATION.cff) carries the same metadata in machine-readable form, so GitHub's
+"Cite this repository" button and tools such as Zenodo pick it up automatically.
