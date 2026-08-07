@@ -170,6 +170,16 @@ The command writes the regenerated figures to:
 
 The principal reproduced values are **2,879/4,800 scanned (60.0%)**, **94.4% with a critical vulnerability**, **96.8% with any vulnerability**, **947 median merged findings**, **70.5% of distinct per-image CVE findings reported by only one scanner**, and **5 genuine credentials among 1,100 sampled secret detections (99.55% false positives)**. Detailed source-to-value mappings are in `expected/paper_values.json`; methodological caveats and intentionally unavailable cross-corpus values are documented in `docs/REPRODUCIBILITY_REPORT.md`.
 
+## Cleaning up
+
+One command removes everything a run created, the database, the environment and the regenerated figures. It never touches anything tracked by git.
+
+```bash
+./cleanup.sh
+```
+
+Pass `--dry-run` to list what would go without removing it (about ~10 GB).
+
 # LICENSE
 
 This artifact is released under the [MIT License](LICENSE). Scanned third-party images and their contents remain the property of their respective owners.
