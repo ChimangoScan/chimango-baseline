@@ -2,6 +2,10 @@
 #
 # Reproduction driver for the uniform-random-sample baseline artifact.
 #
+#   ./reproduce.sh test
+#       The minimal, self-contained check: no network, no database, no Docker.
+#       Needs only the Python standard library.
+#
 #   ./reproduce.sh precomputed
 #       Regenerate every paper figure and re-check the headline numbers from the
 #       SHIPPED data only. No external database, no network, no Docker. This is
@@ -51,7 +55,7 @@ figs_written() {
 }
 
 usage() {
-    sed -n "2,31p" "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,/^set -euo pipefail$/p' "$0" | sed -n 's/^# \{0,1\}//p'
     exit "${1:-0}"
 }
 
@@ -229,6 +233,7 @@ scan() {
 
 # --------------------------------------------------------------------------
 case "${1:-}" in
+    test)        shift; exec "$PYTHON" scripts/minimal_test.py "$@" ;;
     precomputed) shift; precomputed "$@" ;;
     analyze)     shift; analyze "$@" ;;
     scan)        shift; scan "$@" ;;

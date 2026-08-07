@@ -77,6 +77,8 @@ Download time depends on the evaluator's network connection.
 
 # Dependencies
 
+On the host, the evaluator path needs only `git`, `bash`, coreutils and a `python3`; every command in this README is `./reproduce.sh <mode>`. The pinned wheels cover CPython 3.10 to 3.12, and `bootstrap.sh` fetches a supported interpreter itself when the system one is outside that range. `make` is a developer convenience that mirrors the same modes and is not required.
+
 The analysis uses Python's standard library plus the exact versions in `requirements.txt`: Matplotlib 3.8.4, NumPy 1.26.4, and zstandard 0.25.0. PyMongo is needed only to draw a different sample from a private crawl and is not part of artifact evaluation.
 
 The full input is the released `bl_snap.db.zst` dataset:
@@ -119,7 +121,7 @@ Nothing is installed globally. `reproduce.sh` automatically uses `.venv/bin/pyth
 Run the offline functionality check:
 
 ```bash
-make test
+./reproduce.sh test
 ```
 
 **Expected time:** less than 1 s; 0.02 s measured on the reference machine.
@@ -139,11 +141,11 @@ Pick the path that fits the time and disk you have:
 
 | Command | Cost | What it does |
 |---|---|---|
-| `make test` | under 1 s | confirms the setup works; no network, no dataset |
+| `./reproduce.sh test` | under 1 s | confirms the setup works; no network, no dataset |
 | `./reproduce.sh precomputed` | ~2 s | regenerates every paper figure and checks all 66 paper values from the committed outputs. Not a reduced path: it asserts the same numbers as the full run |
 | `./reproduce.sh analyze` | **over an hour** | recomputes those same 66 values from the 10.3 GB database instead of reading them |
 
-`make scan` re-executes the six scanners over thousands of public images. It is outside the evaluator path and should only run on disposable infrastructure.
+`./reproduce.sh scan` re-executes the six scanners over thousands of public images. It is outside the evaluator path and should only run on disposable infrastructure.
 
 ## Claim #1: Main paper results and figures
 

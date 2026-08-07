@@ -36,7 +36,7 @@ verify:
 	./reproduce.sh verify
 
 test:
-	$(PYTHON) scripts/minimal_test.py
+	./reproduce.sh test
 
 clean:
 	rm -f figures/*.pdf
