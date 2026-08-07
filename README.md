@@ -22,21 +22,31 @@ Artifact for the SBSeg 2026 paper *A Uniform Random-Sample Security Measurement 
 
 | Section | Purpose |
 |---|---|
-| [Considered badges](#considered-badges) | Requested SBSeg artifact badges |
+| [Considered seals](#considered-seals) | The four seals and why each one holds |
 | [Basic information](#basic-information) | Reference environment and resource requirements |
 | [Dependencies](#dependencies) | Software and released dataset |
 | [Security concerns](#security-concerns) | Safe handling of scanner reports and container images |
 | [Installation](#installation) | Required setup |
 | [Minimal test](#minimal-test) | Fast offline functionality check |
 | [Experiments](#experiments) | One-command reproduction of the paper results |
+| [Cleaning up](#cleaning-up) | One command removes what a run created |
 | [LICENSE](#license) | Artifact license |
 | [How to cite](#how-to-cite) | Paper reference and machine-readable `CITATION.cff` |
 
-The repository is organized as follows: `analysis/` contains the analyses, committed numeric outputs, manual labels, and figure generators; `data/` contains the canonical 4,800-repository draw; `expected/` maps paper claims to expected values; `docs/` records methodological caveats; and `reproduce.sh` is the single reproduction entry point.
+The repository is organized as follows:
 
-# Considered badges
+| Path | Contents |
+|---|---|
+| [`reproduce.sh`](reproduce.sh) | The single reproduction entry point: `precomputed` and `analyze` |
+| [`analysis/`](analysis/) | The analyses, the committed numeric outputs, the manual labels, and the figure generators |
+| [`data/`](data/) | The canonical 4,800-repository draw |
+| [`expected/`](expected/) | [`paper_values.json`](expected/paper_values.json): each of the 66 asserted numbers, with the section that states it |
+| [`docs/`](docs/) | Methodological caveats and [`REPRODUCIBILITY_REPORT.md`](docs/REPRODUCIBILITY_REPORT.md) |
+| [`cleanup.sh`](cleanup.sh) | Removes everything a run created |
 
-All four SBSeg 2026 badges are requested:
+# Considered seals
+
+The seals considered are: **Available (SeloD)**, **Functional (SeloF)**, **Sustainable (SeloS)** and **Reproducible (SeloR)**.
 
 - **Available (SeloD):** public source code, data, manual labels, and MIT license.
 - **Functional (SeloF):** the offline minimal test runs from a clean checkout in less than one second.
@@ -170,7 +180,7 @@ The command writes the regenerated figures to:
 
 The principal reproduced values are **2,879/4,800 scanned (60.0%)**, **94.4% with a critical vulnerability**, **96.8% with any vulnerability**, **947 median merged findings**, **70.5% of distinct per-image CVE findings reported by only one scanner**, and **5 genuine credentials among 1,100 sampled secret detections (99.55% false positives)**. Detailed source-to-value mappings are in `expected/paper_values.json`; methodological caveats and intentionally unavailable cross-corpus values are documented in `docs/REPRODUCIBILITY_REPORT.md`.
 
-## Cleaning up
+# Cleaning up
 
 One command removes everything a run created, the database, the environment and the regenerated figures. It never touches anything tracked by git.
 
@@ -184,7 +194,7 @@ Pass `--dry-run` to list what would go without removing it (about ~10 GB).
 
 This artifact is released under the [MIT License](LICENSE). Scanned third-party images and their contents remain the property of their respective owners.
 
-## How to cite
+# How to cite
 
 Cite the paper, not the repository:
 
