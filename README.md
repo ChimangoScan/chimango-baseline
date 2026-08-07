@@ -3,6 +3,8 @@
 Artifact for the SBSeg 2026 paper *A Uniform Random-Sample Security Measurement of Docker Hub Images*. It measures the security posture of a typical Docker Hub image, drawing repositories uniformly at random instead of by popularity, and scanning each one with six open-source tools. **2,879** images were analyzed and **94.4%** carry a vulnerability the scanners rate critical, so the high rates reported by earlier studies are not an effect of looking only at popular images. Hand-labeling 1,100 secret detections found **99.5%** of them to be false positives, which is why the paper reports a validated rate rather than the detector's raw output.
 
 > **Paper:** *A Uniform Random-Sample Security Measurement of Docker Hub Images*, SBSeg 2026 Main Track. Artifact evaluation follows the official [submission](https://doc-artefatos.github.io/sbseg2026/subinstrucoes.html) and [review](https://doc-artefatos.github.io/sbseg2026/revinstrucoes.html) instructions.
+
+> **For the artifact evaluation, this README is the only file you need to read.** The other Markdown files in the repository are complementary: they document internals and go deeper than the review requires.
 >
 > **Abstract.** Registry-scale security measurements of Docker Hub define their samples
 > by repository class, category, popularity, or estimated reach. Their findings therefore
