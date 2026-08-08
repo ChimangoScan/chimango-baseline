@@ -140,5 +140,5 @@ fi
 
 say ""
 say "Ready. Next:"
-say "    make test              # offline check, no dataset, under a second"
+say "    ./reproduce.sh test    # offline check, no dataset, under a second"
 say "    ./reproduce.sh analyze # full reproduction, downloads the dataset"
