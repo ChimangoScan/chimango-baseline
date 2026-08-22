@@ -23,7 +23,11 @@ gone() {   # gone <path> <what it is>
 echo "Removing what a run of this artifact leaves behind:"
 gone .venv                     "the Python environment"
 gone .uv                       "the uv binary fetched by bootstrap.sh"
-gone data                      "the 10.3 GB database and its download"
+# Name the two artefacts the run downloads, not the directory: data/ also holds
+# random_sample.jsonl, which is tracked by git, and rm -rf data would take it with
+# them -- leaving ./reproduce.sh test failing until the evaluator restored the file.
+gone data/bl_snap.db           "the 10.3 GB database"
+gone data/bl_snap.db.zst       "its compressed download"
 gone .pytest_cache             "test cache"
 for f in figures/*.pdf; do gone "$f" "regenerated figure"; done
 

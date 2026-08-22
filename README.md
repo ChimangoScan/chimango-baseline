@@ -26,7 +26,7 @@ Artifact for the SBSeg 2026 paper *A Uniform Random-Sample Security Measurement 
 |---|---|
 | [Considered seals](#considered-seals) | The four seals and why each one holds |
 | [Basic information](#basic-information) | Reference environment and resource requirements |
-| [Dependencies](#dependencies) | Software and released dataset |
+| [Dependencies](#dependencies) | Languages, packages, host tools and scanner versions, with the released dataset |
 | [Security concerns](#security-concerns) | Safe handling of scanner reports and container images |
 | [Installation](#installation) | Required setup |
 | [Minimal test](#minimal-test) | Fast offline functionality check |
@@ -40,7 +40,7 @@ The repository is organized as follows:
 | Path | Contents |
 |---|---|
 | [`reproduce.sh`](reproduce.sh) | The single reproduction entry point: `precomputed` and `analyze` |
-| [`analysis/`](analysis/) | The analyses, the committed numeric outputs, the manual labels, and the figure generators |
+| [`analysis/`](analysis/) | The analyses, the committed numeric outputs, the manual labels, and the figure generators. [`analysis/README.md`](analysis/README.md) maps every file there to its single responsibility, its inputs and its outputs |
 | [`data/`](data/) | The canonical 4,800-repository draw |
 | [`expected/`](expected/) | [`paper_values.json`](expected/paper_values.json): each of the 66 asserted numbers, with the section that states it |
 | [`docs/`](docs/) | Methodological caveats and [`REPRODUCIBILITY_REPORT.md`](docs/REPRODUCIBILITY_REPORT.md) |
@@ -52,7 +52,7 @@ The seals considered are: **Available (SeloD)**, **Functional (SeloF)**, **Susta
 
 - **Available (SeloD):** public source code, data, manual labels, and MIT license.
 - **Functional (SeloF):** the offline minimal test runs from a clean checkout in less than one second.
-- **Sustainable (SeloS):** one script per concern in [`analysis/`](analysis/), each writing a documented JSON, JSONL, or TSV output; [`expected/paper_values.json`](expected/paper_values.json) maps each of the **66** numbers the paper asserts to the section or table that states it, so every claim can be located in the artifact.
+- **Sustainable (SeloS):** one script per concern in [`analysis/`](analysis/), each writing a documented JSON, JSONL, or TSV output, and each mapped to its responsibility in [`analysis/README.md`](analysis/README.md); [`expected/paper_values.json`](expected/paper_values.json) maps each of the **66** numbers the paper asserts to the section or table that states it, so every claim can be located in the artifact.
 - **Reproducible (SeloR):** one command downloads the checksum-verified database, recomputes the analyses, regenerates the figures, and checks 66 paper values.
 
 # Basic information
@@ -79,7 +79,56 @@ Download time depends on the evaluator's network connection.
 
 On the host, the evaluator path needs only `git`, `bash`, coreutils and a `python3`; every command in this README is `./reproduce.sh <mode>`. The pinned wheels cover CPython 3.10 to 3.12, and `bootstrap.sh` fetches a supported interpreter itself when the system one is outside that range. `make` is a developer convenience that mirrors the same modes and is not required.
 
-The analysis uses Python's standard library plus the exact versions in `requirements.txt`: Matplotlib 3.8.4, NumPy 1.26.4, and zstandard 0.25.0. PyMongo is needed only to draw a different sample from a private crawl and is not part of artifact evaluation.
+Every version below is the one actually declared in this repository; the last column says where it is declared, so each row can be checked against the file that pins it.
+
+## Languages and runtimes
+
+| Language / runtime | Version | What it is used for | Declared in |
+|---|---|---|---|
+| Python (CPython) | 3.10 to 3.12; **3.12.3** used for the study | every analysis and script in [`analysis/`](analysis/) and [`scripts/`](scripts/) | [`scripts/bootstrap.sh`](scripts/bootstrap.sh) (`SUPPORTED="3.12 3.11 3.10"`), [`requirements.txt`](requirements.txt) |
+| Bash | no minimum pinned; the scripts declare `#!/usr/bin/env bash` | [`reproduce.sh`](reproduce.sh), [`cleanup.sh`](cleanup.sh), [`scripts/bootstrap.sh`](scripts/bootstrap.sh) | the shebang of each script |
+| SQL (SQLite) | whatever SQLite the interpreter links; 3.45.1 with CPython 3.12.3 | read-only queries over the 10.3 GB reports database | Python's standard library; `bootstrap.sh` prints the linked version |
+| GNU Make | not pinned; optional | [`Makefile`](Makefile) targets that mirror `./reproduce.sh` | — |
+
+## Python packages
+
+Installed into `.venv` by [`scripts/bootstrap.sh`](scripts/bootstrap.sh); nothing is installed globally.
+
+| Package | Version | What it is used for | Declared in |
+|---|---|---|---|
+| Matplotlib | **3.8.4** | draws the three paper figures (`analysis/make_figs.py`, `analysis/analyze_extra.py`, style in `analysis/figstyle.py`) | [`requirements.txt`](requirements.txt) |
+| NumPy | **1.26.4** | the array math behind those figures | [`requirements.txt`](requirements.txt) |
+| zstandard | **0.25.0** | stream-decompresses the released `bl_snap.db.zst` (226 MB) to `bl_snap.db` (10.3 GB) | [`requirements.txt`](requirements.txt) |
+| Python standard library (`sqlite3`, `json`, `csv`, `random`, `statistics`, `hashlib`, `urllib`) | ships with the interpreter | reads the reports database, computes every statistic, downloads the dataset (so no `curl` or `wget` is needed) | no install; noted in [`requirements.txt`](requirements.txt) |
+| PyMongo | not pinned and **not installed** | only [`scripts/sample_repos.py`](scripts/sample_repos.py), which draws a new sample from the private crawl's MongoDB. Outside the evaluator path | intentionally omitted, with the reason, in [`requirements.txt`](requirements.txt) |
+
+Matplotlib's own dependencies (`contourpy`, `cycler`, `fonttools`, `kiwisolver`, `packaging`, `pillow`, `pyparsing`, `python-dateutil`, `six`) are not pinned: pip resolves them at install time, and no result depends on which version it picks. Only the three packages above affect the figures, so only those are pinned.
+
+## Host tools
+
+| Tool | Version | What it is used for | Required? |
+|---|---|---|---|
+| `git` | not pinned | cloning the repository | yes |
+| `sha256sum`, `df` (GNU coreutils) | not pinned | verifying the dataset checksums and the free disk before decompressing, in [`reproduce.sh`](reproduce.sh) | yes |
+| `python3-venv` (Debian and Ubuntu package it separately) | matches the interpreter | creating `.venv`; `bootstrap.sh` prints the exact install command when it is missing | yes, on Debian and Ubuntu |
+| [uv](https://github.com/astral-sh/uv) | not pinned; the installer fetches the current release into `.uv/` | fetching a supported interpreter, and only when the system Python is outside 3.10 to 3.12; also required by `./reproduce.sh scan` | only then |
+| `fonts-liberation` | not pinned | typesetting the figures in the paper's serif face; without it Matplotlib falls back to DejaVu Serif and every number is unaffected | no |
+| Docker | not pinned | only `./reproduce.sh scan`, which re-executes the scanners and is outside the evaluator path | no |
+
+## Scanners used in the original campaign
+
+The measurement itself ran through the separate ChimangoScan pipeline. Their versions are deliberately not stated as numbers: the scanner images were referenced by the floating `latest` tag and their vulnerability databases were fetched at scan time, so no version was pinned or recorded, and inventing one here would misrepresent the campaign. The released reports are therefore the record of what was measured; a new scan may resolve newer tools and newer vulnerability data. This is also listed as a known limitation in [`docs/REPRODUCIBILITY_REPORT.md`](docs/REPRODUCIBILITY_REPORT.md).
+
+| Scanner | Version | What it contributed |
+|---|---|---|
+| Trivy | floating `latest` at scan time (not recorded) | known vulnerabilities in the installed packages |
+| Grype | floating `latest` at scan time (not recorded) | known vulnerabilities, independently of Trivy |
+| OSV-Scanner | floating `latest` at scan time (not recorded) | known vulnerabilities from the OSV database |
+| Syft | floating `latest` at scan time (not recorded) | the package inventory (SBOM), and with it the base-OS distribution |
+| Dockle | floating `latest` at scan time (not recorded) | image-hardening (CIS) findings |
+| TruffleHog | floating `latest` at scan time (not recorded), run in unverified mode | strings that look like embedded credentials, the input to the manual labeling |
+
+## Released dataset
 
 The full input is the released `bl_snap.db.zst` dataset:
 
@@ -88,8 +137,6 @@ The full input is the released `bl_snap.db.zst` dataset:
 | `bl_snap.db.zst` | 226 MB | 10.3 GB | Automatic in `reproduce.sh` |
 
 The script downloads the database from the repository's `dataset-v1` release, verifies the compressed and decompressed SHA-256 hashes, and stores it under `data/`. Download and decompression use the isolated Python environment; the evaluator does not need system-wide packages or a manual dataset download.
-
-The original scanning campaign used six tools through the separate ChimangoScan pipeline: Trivy, Grype and OSV-Scanner report known vulnerabilities in the installed packages, Syft inventories those packages, Dockle checks image-hardening rules, and TruffleHog flags strings that look like embedded credentials. Their image references used floating `latest` tags and their vulnerability databases were fetched at scan time. Consequently, the released reports are the record of the measured campaign; a new scan may resolve newer tools and vulnerability data.
 
 # Security concerns
 

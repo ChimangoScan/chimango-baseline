@@ -19,8 +19,8 @@ Methodology mirrors the exposure-ranked paper's recount so the two are like-for-
     (shared rule), plus a broader 'key'-substring rate reported separately
 
 Outputs (under $BL_OUT, default: this script's directory):
-  repro_baseline.json
-  repro_baseline.md
+  repro_baseline.json   (repro_baseline.md, alongside it, is a hand-written
+                         narrative reading of this JSON, not a script output)
 Inputs are overridable via environment variables (BL_DB, BL_OUT, OSV_CACHE);
 see the constants just below.
 """
@@ -35,7 +35,7 @@ from collections import Counter, defaultdict
 
 # Paths are overridable via environment variables so the artifact runs anywhere.
 #   BL_DB      reports SQLite (release asset; 10.3 GB)
-#   BL_OUT     output directory for repro_baseline.json/.md (default: this dir)
+#   BL_OUT     output directory for repro_baseline.json (default: this dir)
 #   OSV_CACHE  optional osv_severity_cache.json (severity backfill); if absent,
 #              osv unknown severities are simply left as unknown.
 DB = os.environ.get("BL_DB", "/path/to/reports.db")
