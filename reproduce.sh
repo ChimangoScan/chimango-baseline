@@ -107,7 +107,8 @@ verify() {
 }
 
 # --------------------------------------------------------------------------
-DATASET_URL="https://github.com/ChimangoScan/chimango-baseline/releases/download/dataset-v1/bl_snap.db.zst"
+# Archived on Zenodo, DOI 10.5281/zenodo.22666268
+DATASET_URL="https://zenodo.org/records/22666269/files/bl_snap.db.zst"
 SHA_ZST="8fb43ecd312483d0a1b578c8c7685546a2197bc0d90577e2b7f8d19d77eeb580"
 SHA_DB="70e43470cd877999a236be578e733233b8d3a9a382f220e7804b98ad46c58ab6"
 
