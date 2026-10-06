@@ -149,7 +149,7 @@ The full input is the released `bl_snap.db.zst` dataset:
 |---|---:|---:|---|
 | `bl_snap.db.zst` | 226 MB | 10.3 GB | Automatic in `reproduce.sh` |
 
-The script downloads the database from the repository's `dataset-v1` release, verifies the compressed and decompressed SHA-256 hashes, and stores it under `data/`. Download and decompression use the isolated Python environment; the evaluator does not need system-wide packages or a manual dataset download.
+The script downloads the database from its Zenodo record ([10.5281/zenodo.22666268](https://doi.org/10.5281/zenodo.22666268); the same file is attached to the repository's `dataset-v1` release), verifies the compressed and decompressed SHA-256 hashes, and stores it under `data/`. Download and decompression use the isolated Python environment; the evaluator does not need system-wide packages or a manual dataset download.
 
 # Security concerns
 
