@@ -1,5 +1,18 @@
 # Chimango Baseline: Uniform Random-Sample Security Measurement of Docker Hub Images
 
+<p align="center">
+  <a href="https://doc-artefatos.github.io/sbseg2026/results.html">
+    <img src="docs/assets/seals/SBRC25_SF_SeloD.png" alt="Artefatos Disponíveis / Available (SeloD)" width="110">
+    <img src="docs/assets/seals/SBRC25_SF_SeloF.png" alt="Artefatos Funcionais / Functional (SeloF)" width="110">
+    <img src="docs/assets/seals/SBRC25_SF_SeloS.png" alt="Artefatos Sustentáveis / Sustainable (SeloS)" width="110">
+    <img src="docs/assets/seals/SBRC25_SF_SeloR.png" alt="Experimentos Reprodutíveis / Reproducible (SeloR)" width="110">
+  </a>
+</p>
+
+<p align="center"><sub>Official SBSeg 2026 artifact-evaluation seals awarded to this artifact (Main Track): Available, Functional, Sustainable and Reproducible. <a href="https://doc-artefatos.github.io/sbseg2026/results.html">Official results</a>. Seal artwork by the SBSeg Artifact Evaluation Committee.</sub></p>
+
+> **Published** in the Anais do XXVI Simpósio Brasileiro de Cibersegurança (SBSeg 2026), pp. 1406-1412: [SBC OpenLib](https://sol.sbc.org.br/index.php/sbseg/article/view/44371).
+
 Artifact for the SBSeg 2026 paper *A Uniform Random-Sample Security Measurement of Docker Hub Images*. It measures the security posture of a typical Docker Hub image, drawing repositories uniformly at random instead of by popularity, and scanning each one with six open-source tools. **2,879** images were analyzed and **94.4%** carry a vulnerability the scanners rate critical, so the high rates reported by earlier studies are not an effect of looking only at popular images. Hand-labeling 1,100 secret detections found **99.5%** of them to be false positives, which is why the paper reports a validated rate rather than the detector's raw output.
 
 > **Paper:** *A Uniform Random-Sample Security Measurement of Docker Hub Images*, SBSeg 2026 Main Track. Artifact evaluation follows the official [submission](https://doc-artefatos.github.io/sbseg2026/subinstrucoes.html) and [review](https://doc-artefatos.github.io/sbseg2026/revinstrucoes.html) instructions.
@@ -255,7 +268,9 @@ Cite the paper, not the repository:
 @inproceedings{kapelinski2026chimangobase,
   author    = {Kapelinski, Cristhian and Kreutz, Diego},
   title     = {A Uniform Random-Sample Security Measurement of Docker Hub Images},
-  booktitle = {Anais do XXVII Simpósio Brasileiro de Segurança da Informação e de Sistemas Computacionais (SBSeg 2026)},
+  booktitle = {Anais do XXVI Simpósio Brasileiro de Cibersegurança (SBSeg 2026)},
+  pages     = {1406--1412},
+  url       = {https://sol.sbc.org.br/index.php/sbseg/article/view/44371},
   year      = {2026},
   publisher = {Sociedade Brasileira de Computação},
 }
